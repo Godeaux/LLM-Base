@@ -12,10 +12,14 @@ import {
 const enemyMeshes = new Map<number, THREE.Group>();
 const projectileMeshes = new Map<number, THREE.Object3D>();
 const arcaneTrails = new Map<number, THREE.Mesh[]>();
+const lightningLines: THREE.Line[] = [];
+
+const LIGHTNING_MAT = new THREE.LineBasicMaterial({ color: 0x88ccff, linewidth: 2 });
 
 export function syncRenderer(state: GameState, scene: THREE.Scene): void {
   syncEnemies(state, scene);
   syncProjectiles(state, scene);
+  syncLightning(state, scene);
 }
 
 function syncEnemies(state: GameState, scene: THREE.Scene): void {
@@ -121,6 +125,43 @@ function syncArrowVisuals(obj: THREE.Object3D, velocity: CANNON.Vec3): void {
     const up = new THREE.Vector3(0, 1, 0);
     const quat = new THREE.Quaternion().setFromUnitVectors(up, dir);
     obj.quaternion.copy(quat);
+  }
+}
+
+function syncLightning(state: GameState, scene: THREE.Scene): void {
+  // Remove old lines
+  for (const line of lightningLines) scene.remove(line);
+  lightningLines.length = 0;
+
+  for (const arc of state.lightningArcs) {
+    const fade = 1 - arc.age / arc.maxAge;
+    // Build jagged line between chain points
+    for (let i = 0; i < arc.points.length - 1; i++) {
+      const a = arc.points[i]!;
+      const b = arc.points[i + 1]!;
+      const pts: THREE.Vector3[] = [new THREE.Vector3(a.x, a.y, a.z)];
+
+      // Add 3-4 random jag points between each pair
+      const segs = 4;
+      for (let s = 1; s < segs; s++) {
+        const t = s / segs;
+        const jitter = 0.6;
+        pts.push(new THREE.Vector3(
+          a.x + (b.x - a.x) * t + (Math.random() - 0.5) * jitter,
+          a.y + (b.y - a.y) * t + (Math.random() - 0.5) * jitter,
+          a.z + (b.z - a.z) * t + (Math.random() - 0.5) * jitter,
+        ));
+      }
+      pts.push(new THREE.Vector3(b.x, b.y, b.z));
+
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = LIGHTNING_MAT.clone();
+      mat.opacity = fade;
+      mat.transparent = true;
+      const line = new THREE.Line(geo, mat);
+      scene.add(line);
+      lightningLines.push(line);
+    }
   }
 }
 

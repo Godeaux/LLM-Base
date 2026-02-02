@@ -1,4 +1,4 @@
-import { GameState, ProjectileType } from "../state.js";
+import { GameState, AttackType } from "../state.js";
 
 let hpBar: HTMLDivElement | null = null;
 let hpText: HTMLSpanElement | null = null;
@@ -6,10 +6,11 @@ let waveText: HTMLSpanElement | null = null;
 let killText: HTMLSpanElement | null = null;
 let gameOverOverlay: HTMLDivElement | null = null;
 
-const ATTACK_LABELS: Record<ProjectileType, { label: string; color: string }> = {
+const ATTACK_LABELS: Record<AttackType, { label: string; color: string }> = {
   fireball: { label: "Fireball", color: "#ff6600" },
   arrow: { label: "Arrow", color: "#c8a82e" },
   arcane: { label: "Arcane Bolt", color: "#8844ff" },
+  lightning: { label: "Lightning", color: "#88ccff" },
 };
 
 export function createHUD(state: GameState): void {
@@ -67,7 +68,7 @@ export function createHUD(state: GameState): void {
   `;
   togglePanel.innerHTML = `<div style="color: #888; margin-bottom: 8px; font-size: 11px;">ATTACK TOGGLES</div>`;
 
-  for (const [type, info] of Object.entries(ATTACK_LABELS) as [ProjectileType, { label: string; color: string }][]) {
+  for (const [type, info] of Object.entries(ATTACK_LABELS) as [AttackType, { label: string; color: string }][]) {
     const row = document.createElement("label");
     row.style.cssText = `display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 3px 0;`;
 

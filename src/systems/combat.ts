@@ -1,6 +1,7 @@
 import * as CANNON from "cannon-es";
 import { EnemyState, GameState } from "../state.js";
 import { fireProjectile } from "../entities/projectile.js";
+import { fireLightning } from "./lightning.js";
 
 export function updateTowerCombat(state: GameState, world: CANNON.World, dt: number): void {
   if (state.tower.hp <= 0) return;
@@ -62,6 +63,15 @@ export function updateTowerCombat(state: GameState, world: CANNON.World, dt: num
         state.projectiles.push(proj);
       }
       state.tower.arcaneFireTimer = 1 / state.tower.arcaneFireRate;
+    }
+  }
+
+  // --- Lightning: instant chain zap ---
+  if (toggles.lightning) {
+    state.tower.lightningFireTimer -= dt;
+    if (state.tower.lightningFireTimer <= 0) {
+      fireLightning(state);
+      state.tower.lightningFireTimer = 1 / state.tower.lightningFireRate;
     }
   }
 }

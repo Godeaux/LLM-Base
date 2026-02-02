@@ -4,6 +4,7 @@ export interface GameState {
   tower: TowerState;
   enemies: EnemyState[];
   projectiles: ProjectileState[];
+  lightningArcs: LightningArc[];
   wave: WaveState;
   time: number;
   deltaTime: number;
@@ -27,8 +28,15 @@ export interface TowerState {
   arcaneFireTimer: number;
   arcaneDamage: number;
   arcaneSpeed: number;
+  // Lightning attack
+  lightningFireRate: number;
+  lightningFireTimer: number;
+  lightningDamage: number;
+  lightningChains: number; // how many enemies it jumps to
+  lightningChainRange: number;
+  lightningStunDuration: number;
   // Debug toggles
-  attackToggles: Record<ProjectileType, boolean>;
+  attackToggles: Record<AttackType, boolean>;
 }
 
 export interface EnemyState {
@@ -39,6 +47,7 @@ export interface EnemyState {
   speed: number;
   damage: number; // damage per second to tower
   alive: boolean;
+  stunTimer: number; // seconds remaining of stun (0 = not stunned)
   // leg animation
   legPhase: number;
   meshGroup: null; // set by renderer
@@ -46,6 +55,14 @@ export interface EnemyState {
 }
 
 export type ProjectileType = "fireball" | "arrow" | "arcane";
+export type AttackType = ProjectileType | "lightning";
+
+/** Visual-only lightning arc that fades out over time. */
+export interface LightningArc {
+  points: CANNON.Vec3[]; // chain of positions: tower -> enemy1 -> enemy2 -> ...
+  age: number;
+  maxAge: number;
+}
 
 export interface ProjectileState {
   id: number;
@@ -99,10 +116,18 @@ export function createInitialState(): GameState {
       arcaneFireTimer: 0.6,
       arcaneDamage: 1.8,
       arcaneSpeed: 12,
-      attackToggles: { fireball: true, arrow: true, arcane: true },
+      // Lightning: instant chain zap
+      lightningFireRate: 0.6,
+      lightningFireTimer: 0.9,
+      lightningDamage: 0.8,
+      lightningChains: 3,
+      lightningChainRange: 8,
+      lightningStunDuration: 0.4,
+      attackToggles: { fireball: true, arrow: true, arcane: true, lightning: true },
     },
     enemies: [],
     projectiles: [],
+    lightningArcs: [],
     wave: {
       number: 1,
       enemiesRemaining: 0,

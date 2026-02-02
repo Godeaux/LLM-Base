@@ -32,6 +32,7 @@ export function spawnEnemy(state: GameState, world: CANNON.World): EnemyState {
     speed: 3 + Math.random() * 1.5,
     damage: 1,
     alive: true,
+    stunTimer: 0,
     legPhase: Math.random() * Math.PI * 2,
     meshGroup: null,
     type: "walker",
@@ -43,6 +44,15 @@ export function updateEnemies(state: GameState, dt: number): void {
 
   for (const enemy of state.enemies) {
     if (!enemy.alive) continue;
+
+    // Stun: decrement timer and skip movement
+    if (enemy.stunTimer > 0) {
+      enemy.stunTimer -= dt;
+      // Heavy damping while stunned so they slow to a halt
+      enemy.body.velocity.x *= 0.92;
+      enemy.body.velocity.z *= 0.92;
+      continue;
+    }
 
     const pos = enemy.body.position;
     const dx = towerPos.x - pos.x;
