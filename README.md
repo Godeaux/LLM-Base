@@ -38,9 +38,23 @@ Prefix requests to invoke specialized expertise:
 ```
 .llm/           → LLM collaboration docs (start here)
 src/index.ts    → Empty entry point
+tests/          → Test suite (mirrors src/ structure)
 ```
 
 Everything else emerges from your game's needs.
+
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Start dev server (after configuring renderer) |
+| `npm run build` | Type-check with TypeScript |
+| `npm run lint` | Lint with ESLint |
+| `npm run lint:fix` | Auto-fix lint issues |
+| `npm run format` | Format with Prettier |
+| `npm run format:check` | Check formatting |
+| `npm test` | Run tests with Vitest |
+| `npm run test:watch` | Run tests in watch mode |
 
 ## Principles (summary)
 

@@ -79,3 +79,9 @@ From first playable, grow the game iteratively:
 4. Repeat
 
 Each increment should be runnable. Broken builds block everything.
+
+**Quality checks every increment:**
+- `npm run build` — no type errors
+- `npm run lint` — no lint warnings
+- `npm test` — no test failures
+- Add tests for new systems in `tests/` as you go

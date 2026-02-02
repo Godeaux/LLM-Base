@@ -84,3 +84,12 @@ Guidelines that inform decisions as the project grows. Not rigid rules—princip
 - Not everything needs tests.
 - Test: state transitions, save/load, calculations, networking.
 - Skip: rendering, UI layout, things you'll see immediately.
+- Tests live in `tests/` mirroring `src/` structure.
+- Use Vitest. Run with `npm test` or `npm run test:watch`.
+- Write tests alongside new systems—don't bolt them on later.
+
+### Lint and format consistently
+- ESLint enforces code quality. Prettier enforces style.
+- Run `npm run lint` and `npm run format:check` before committing.
+- No `any`. ESLint will catch it. Fix it, don't suppress it.
+- Consistent formatting removes style debates from code review.
