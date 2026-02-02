@@ -1,96 +1,126 @@
 # Bootstrap Instructions
 
-> **This file is for the LLM, not the human.** When a user opens this project and describes their game idea, follow this process exactly.
+> **THIS FILE IS FOR THE LLM, NOT THE HUMAN.**
 
 ---
 
-## Your Role
+## ⚠️ CRITICAL: DO NOT WRITE CODE YET
 
-You are a game development collaborator. This repository is a blank foundation. Your job is to **ask questions first**, then **rewrite this repo's files** to match the user's game. Do not write game code until the foundation is configured.
+**Read this entire file before responding to the user.**
 
----
+When a user describes their game idea — no matter how detailed — you MUST complete the conversation steps below BEFORE writing any code, creating any files, or modifying any configs. Even if the user gives you a rich description, there are always gaps. Your job is to find them.
 
-## Step 1: Greet and Orient
-
-When the user first describes their game (or just says "help me make a game"), respond with something like:
-
-> Great — before we write any code, I need to understand what you're building so I can set up the right foundation. I'm going to ask you questions in three rounds: **vision**, **gameplay**, and **technical**. You can answer briefly — I'll ask follow-ups if I need more detail.
-
-Then immediately begin Step 2.
+**The user's first message is a starting point, not a spec.** Acknowledge what they said, then ask about what they DIDN'T say.
 
 ---
 
-## Step 2: Vision Questions
+## Step 1: Acknowledge and Reframe
 
-Ask these. The user doesn't need to answer all of them — infer what you can, ask follow-ups on what matters.
+Read the user's message carefully. Respond by:
 
-1. **One-sentence pitch.** What's the game? (e.g., "A roguelike where you're a librarian defending books from moths")
-2. **References.** What existing games does this feel like? (e.g., "Vampire Survivors meets Papers Please")
-3. **Scope.** Is this a weekend jam, a vertical slice, or something you want to ship?
-4. **Timeline.** Days, weeks, months?
-5. **Team.** Just you, or collaborators?
-6. **Platform.** Where does this run? (web browser, desktop app, mobile, Steam)
+1. Restating their idea back in 2-3 sentences to show you understood
+2. Noting what you CAN already infer (so you don't re-ask things they covered)
+3. Saying something like:
 
-After the user answers, summarize what you understood back to them. Confirm before moving on.
+> Before I write any code, I want to ask some questions to make sure I build the right foundation. This will go in three rounds — you can answer as briefly as you want.
 
----
-
-## Step 3: Gameplay Questions
-
-These determine the systems you'll need. Ask the relevant ones based on Step 2.
-
-1. **Core verb.** What does the player DO? (jump, shoot, build, explore, manage, solve)
-2. **Perspective.** 2D top-down, 2D side-scroller, 3D first-person, 3D third-person, isometric, other?
-3. **Moment-to-moment.** What's a typical 30-second loop? What keeps it engaging?
-4. **Failure.** How does the player lose or fail? Permadeath, lives, checkpoints, no failure state?
-5. **Progression.** How does the player get stronger / advance? Unlocks, levels, upgrades, narrative?
-6. **Session length.** 5-minute runs? Hour-long sessions?
-7. **Multiplayer?** None, local co-op, online competitive, online cooperative?
-
-Again, summarize and confirm.
+Then ask the **first round only**. Do NOT dump all questions at once.
 
 ---
 
-## Step 4: Technical Decisions
+## Step 2: Vision Round (ask these FIRST, wait for answers)
 
-Based on the answers above, **recommend** a tech stack. Don't just pick — explain your reasoning and let the user override. Cover:
+Look at what the user already told you. Skip questions they already answered. Ask what's missing from this list:
 
-1. **Renderer**: Recommend one of: Three.js, Babylon.js, Phaser, PixiJS, Excalibur.js, PlayCanvas, or custom Canvas/WebGL. Explain why.
-2. **State management**: Simple objects, finite state machines, or ECS? Recommend based on entity complexity.
-3. **Physics**: Built-in (Phaser/Babylon), Matter.js, Rapier, cannon-es, or none?
-4. **Audio**: Howler.js, Web Audio API directly, or framework built-in?
-5. **Build tool**: Vite (recommended default), webpack, or other?
-6. **Networking** (if multiplayer): Socket.io, WebRTC, Colyseus, or other?
-7. **Additional dependencies**: Only what's needed. Justify each one.
+- **Scope**: Weekend jam, vertical slice, or something you want to ship?
+- **Timeline**: How much time are you giving this? Days, weeks, months?
+- **Team**: Solo or collaborators? Are you the programmer, or are you non-technical using AI to build?
+- **Platform**: Where does this run? Browser, desktop (Electron/Steam), mobile?
+- **Art direction**: Do you have art assets, or does everything need to be placeholder/procedural?
+- **Monetization / audience**: Just for fun, portfolio piece, or intended for players?
 
-Present this as a clear table or list. Get user confirmation before proceeding.
+**WAIT for the user to respond before proceeding to Step 3.** Do not continue to gameplay questions in the same message.
+
+---
+
+## Step 3: Gameplay Round (ask AFTER Step 2 is answered)
+
+Again, skip anything the user already covered. Ask what's missing:
+
+- **Camera / perspective**: How does the player view the game? (top-down, orbital, first-person, fixed, etc.)
+- **Core interaction**: What does the player actively DO vs. what happens automatically?
+- **Pacing**: Is this a lean-forward game (constant decisions) or lean-back (watch and occasionally intervene)?
+- **Failure state**: Can you lose? What happens? Restart, checkpoint, or no failure?
+- **Progression arc**: What does hour 1 vs. hour 10 look like? What changes?
+- **Session length**: 5-minute runs, 30-minute sessions, or endless?
+- **Complexity curve**: What's simple at first and gets complex later?
+
+**WAIT for the user to respond before proceeding to Step 4.**
+
+---
+
+## Step 4: Technical Recommendation (ask AFTER Step 3 is answered)
+
+Now YOU present a recommended tech stack. Don't ask the user to choose from a menu — make a specific recommendation and explain why. The user can push back.
+
+Cover these:
+
+| Decision | Your recommendation | Why |
+|----------|-------------------|-----|
+| **Renderer** | Three.js / Babylon.js / Phaser / PixiJS / etc. | Based on 2D/3D, complexity, features needed |
+| **Physics** | Rapier / cannon-es / Ammo.js / built-in / none | Based on gameplay needs |
+| **State management** | Simple objects / FSM / ECS | Based on entity complexity |
+| **Audio** | Howler.js / Web Audio / framework built-in | Based on audio needs |
+| **Build tool** | Vite (default) / other | Almost always Vite |
+| **Networking** | None / Socket.io / Colyseus / WebRTC | Only if multiplayer |
+| **Other deps** | Only what's needed | Justify each one |
+
+End with: *"Does this stack sound right to you, or do you have preferences I should know about?"*
+
+**WAIT for confirmation before proceeding to Step 5.**
 
 ---
 
 ## Step 5: Rewrite the Foundation
 
-Once the user confirms the tech decisions, **modify these files**:
+Only after the user confirms (or adjusts) the tech stack, rewrite these files:
 
 ### Files to rewrite:
 
-1. **`package.json`** — Update name, add chosen dependencies to `devDependencies` or `dependencies`, update scripts (`dev` should actually start a dev server, `build` should produce output).
+1. **`package.json`**
+   - Update `name` to match the game
+   - Add chosen renderer/physics/audio as dependencies
+   - Update `dev` script to actually start a Vite dev server (or whatever was chosen)
+   - Keep existing lint/format/test scripts
 
-2. **`tsconfig.json`** — Adjust if needed for the chosen renderer/framework (e.g., JSX settings for React-based UI, path aliases).
+2. **`tsconfig.json`**
+   - Adjust for chosen framework (JSX if needed, path aliases, etc.)
 
-3. **`eslint.config.js`** — Add any framework-specific plugins if needed.
+3. **`eslint.config.js`**
+   - Add framework-specific plugins if needed
 
-4. **`src/index.ts`** — Replace the empty export with a minimal bootstrap: initialize the renderer, create a game loop, show something on screen. Keep it under 30 lines. This should be the "hello world" of their specific game.
+4. **`src/index.ts`**
+   - Replace empty export with a minimal "hello world" for the chosen renderer
+   - Initialize the renderer, create a basic scene, show SOMETHING on screen
+   - Keep it under 40 lines — this is proof-of-life, not the game
 
-5. **`.llm/DECISIONS.md`** — Fill in the decisions template with everything decided in Steps 2-4.
+5. **`.llm/DECISIONS.md`**
+   - Fill in the tech stack table with choices and reasoning
+   - Fill in dependencies with alternatives that were considered
+   - Add architecture notes
 
-6. **`.llm/DISCOVERY.md`** — Fill in the blank fields with the user's answers so it becomes a living design document rather than a questionnaire.
+6. **`.llm/DISCOVERY.md`**
+   - Fill in all the blank fields with the user's actual answers
 
-7. **`README.md`** — Rewrite to describe THIS game, not the foundation template. Keep the scripts table, update everything else.
+7. **`README.md`**
+   - Rewrite to describe THIS game, not the template
+   - Keep the scripts table, update everything else
 
-### Files to NOT touch yet:
-- `.llm/PERSONAS.md` — Still useful as-is
-- `.llm/PRINCIPLES.md` — Still useful as-is
-- Don't create game-specific folders yet. That happens when code demands it.
+### Files to NOT touch:
+- `.llm/PERSONAS.md` — useful as-is for ongoing development
+- `.llm/PRINCIPLES.md` — useful as-is for ongoing development
+- `.llm/BOOTSTRAP.md` — this file; leave it for reference
+- Don't create game-specific folders or systems yet
 
 ---
 
@@ -98,19 +128,29 @@ Once the user confirms the tech decisions, **modify these files**:
 
 After rewriting:
 
-1. Run `npm install` (or tell the user to)
-2. Run `npm run build` — should pass with no errors
-3. Run `npm run lint` — should pass
-4. Tell the user: *"The foundation is configured. Run `npm run dev` to see the hello world. From here, let's define your first playable — the smallest version that lets you feel if the core is fun."*
+1. Run `npm install`
+2. Run `npm run build` — must pass
+3. Run `npm run lint` — must pass
+4. Tell the user: *"The foundation is configured. Run `npm run dev` to see it working. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
 
-Then transition into normal development using the personas defined in `PERSONAS.md`.
+Then transition to normal development using the personas in `PERSONAS.md`.
 
 ---
 
-## Important Behaviors
+## Rules (read these carefully)
 
-- **Never assume.** If you're unsure about something, ask. A wrong assumption wastes more time than a question.
-- **Recommend, don't dictate.** Present options with tradeoffs. Let the user choose.
-- **Keep it minimal.** Don't add libraries "just in case." Every dependency is a maintenance cost.
-- **Rewrite, don't append.** When you modify foundation files, replace content cleanly. Don't leave template placeholders or TODO markers.
-- **One round-trip at a time.** Don't dump all questions at once. Vision → confirm → gameplay → confirm → technical → confirm → rewrite.
+1. **NEVER write code before completing Steps 1-4.** Even if the user says "just start coding." The questions take 5 minutes. Bad foundations waste days.
+
+2. **Don't re-ask things the user already told you.** Parse their initial message carefully. Only ask about gaps.
+
+3. **One round at a time.** Send vision questions → wait → send gameplay questions → wait → send tech recommendation → wait → then rewrite. Never combine rounds.
+
+4. **Summarize before moving on.** After each round, restate what you understood. Let the user correct misunderstandings before they compound.
+
+5. **Recommend, don't menu.** Don't say "would you like Three.js or Babylon.js?" Say "I recommend Three.js because [reason]. Here's what that means for your project."
+
+6. **Keep it conversational.** These are questions, not a form. React to what the user says. Follow up on interesting details. Skip irrelevant questions.
+
+7. **The user might not know the answer.** That's fine. If they say "I don't know," make a recommendation and explain it. Don't stall.
+
+8. **Bias toward starting small.** When in doubt, recommend simpler tech, fewer dependencies, less architecture. It's easier to add than to remove.
