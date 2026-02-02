@@ -1,37 +1,136 @@
 import * as CANNON from "cannon-es";
-import { GameState, ProjectileState, nextEntityId } from "../state.js";
+import { GameState, ProjectileState, ProjectileType, nextEntityId } from "../state.js";
 import { GROUP_ENEMY, GROUP_GROUND, GROUP_PROJECTILE } from "../systems/physics.js";
 
+interface LaunchConfig {
+  speed: number;
+  damage: number;
+  knockback: number;
+  type: ProjectileType;
+  splashRadius: number;
+  splashForce: number;
+  radius: number;
+  mass: number;
+  launchAngleMin: number;
+  launchAngleMax: number;
+  maxAge: number;
+}
+
+const FIREBALL_CONFIG: LaunchConfig = {
+  speed: 20,
+  damage: 2.5,
+  knockback: 22,
+  type: "fireball",
+  splashRadius: 5,
+  splashForce: 14,
+  radius: 0.35,
+  mass: 2,
+  launchAngleMin: Math.PI / 5, // 36 deg — high arcs
+  launchAngleMax: Math.PI / 3, // 60 deg
+  maxAge: 6,
+};
+
+const ARROW_CONFIG: LaunchConfig = {
+  speed: 45,
+  damage: 1,
+  knockback: 8,
+  type: "arrow",
+  splashRadius: 0,
+  splashForce: 0,
+  radius: 0.1,
+  mass: 0.3,
+  launchAngleMin: Math.PI / 12, // 15 deg — flat trajectories
+  launchAngleMax: Math.PI / 5,  // 36 deg
+  maxAge: 4,
+};
+
+/**
+ * Iterative lead-target prediction.
+ * Runs 3 iterations to converge on an intercept point, accounting for
+ * the projectile's own flight time at each step.
+ */
+function predictIntercept(
+  origin: CANNON.Vec3,
+  targetPos: CANNON.Vec3,
+  targetVel: CANNON.Vec3,
+  projectileSpeed: number,
+  gravity: number,
+  launchAngle: number,
+): CANNON.Vec3 {
+  let predicted = targetPos.clone();
+
+  for (let i = 0; i < 3; i++) {
+    const dx = predicted.x - origin.x;
+    const dz = predicted.z - origin.z;
+    const horizDist = Math.sqrt(dx * dx + dz * dz);
+
+    // Estimate flight time from horizontal component
+    const hSpeed = Math.cos(launchAngle) * projectileSpeed;
+    const flightTime = hSpeed > 0.1 ? horizDist / hSpeed : 1;
+
+    // Also account for vertical: the projectile arcs up then down
+    // under gravity, so actual flight time is slightly longer.
+    // Use the quadratic: y = vy*t - 0.5*g*t^2, solve for t when y = targetY - originY
+    const vy = Math.sin(launchAngle) * projectileSpeed;
+    const dy = (targetPos.y + 0.5) - origin.y;
+    // Approximate: flight time ~ 2*vy/g if target is at same height
+    const vertFlightTime = vy > 0 ? (vy + Math.sqrt(Math.max(0, vy * vy + 2 * gravity * dy))) / gravity : flightTime;
+    const estimatedTime = Math.min(flightTime, vertFlightTime);
+
+    // Predict where enemy will be at that time
+    predicted = new CANNON.Vec3(
+      targetPos.x + targetVel.x * estimatedTime,
+      targetPos.y + 0.5,
+      targetPos.z + targetVel.z * estimatedTime,
+    );
+  }
+
+  return predicted;
+}
+
 export function fireProjectile(
-  state: GameState,
+  _state: GameState,
   world: CANNON.World,
   targetPos: CANNON.Vec3,
+  targetVel: CANNON.Vec3,
+  type: ProjectileType,
 ): ProjectileState {
-  const origin = new CANNON.Vec3(0, 6, 0); // top of tower
+  const config = type === "fireball" ? FIREBALL_CONFIG : ARROW_CONFIG;
+  const origin = new CANNON.Vec3(0, 6.5, 0); // top of tower
 
-  // Calculate launch velocity for an arcing trajectory
   const dx = targetPos.x - origin.x;
-  const dy = targetPos.y - origin.y;
   const dz = targetPos.z - origin.z;
   const horizDist = Math.sqrt(dx * dx + dz * dz);
 
-  const speed = state.tower.projectileSpeed;
-  // Launch at ~45 degrees for a nice arc, adjusted for distance
-  const launchAngle = Math.min(Math.PI / 3, Math.max(Math.PI / 6, Math.atan2(horizDist, 10)));
-  const vy = Math.sin(launchAngle) * speed;
-  const hSpeed = Math.cos(launchAngle) * speed;
+  // Choose launch angle based on distance (farther = higher arc)
+  const distFactor = Math.min(1, horizDist / 50);
+  const launchAngle =
+    config.launchAngleMin + (config.launchAngleMax - config.launchAngleMin) * distFactor;
 
-  const dirX = horizDist > 0.1 ? (dx / horizDist) * hSpeed : 0;
-  const dirZ = horizDist > 0.1 ? (dz / horizDist) * hSpeed : 0;
+  // Iterative lead prediction
+  const predicted = predictIntercept(
+    origin, targetPos, targetVel, config.speed, 20, launchAngle,
+  );
+
+  // Recalculate direction to predicted position
+  const pdx = predicted.x - origin.x;
+  const pdz = predicted.z - origin.z;
+  const pHorizDist = Math.sqrt(pdx * pdx + pdz * pdz);
+
+  const vy = Math.sin(launchAngle) * config.speed;
+  const hSpeed = Math.cos(launchAngle) * config.speed;
+
+  const dirX = pHorizDist > 0.1 ? (pdx / pHorizDist) * hSpeed : 0;
+  const dirZ = pHorizDist > 0.1 ? (pdz / pHorizDist) * hSpeed : 0;
 
   const body = new CANNON.Body({
-    mass: 1,
-    shape: new CANNON.Sphere(0.3),
+    mass: config.mass,
+    shape: new CANNON.Sphere(config.radius),
     position: origin.clone(),
     velocity: new CANNON.Vec3(dirX, vy, dirZ),
     collisionFilterGroup: GROUP_PROJECTILE,
     collisionFilterMask: GROUP_ENEMY | GROUP_GROUND,
-    linearDamping: 0.01,
+    linearDamping: type === "arrow" ? 0.005 : 0.01,
   });
 
   world.addBody(body);
@@ -40,10 +139,13 @@ export function fireProjectile(
     id: nextEntityId(),
     body,
     alive: true,
-    damage: state.tower.damage,
-    knockback: 18,
+    damage: config.damage,
+    knockback: config.knockback,
     age: 0,
-    maxAge: 5,
+    maxAge: config.maxAge,
+    type: config.type,
+    splashRadius: config.splashRadius,
+    splashForce: config.splashForce,
   };
 }
 
@@ -51,7 +153,7 @@ export function updateProjectiles(state: GameState, dt: number): void {
   for (const proj of state.projectiles) {
     if (!proj.alive) continue;
     proj.age += dt;
-    if (proj.age > proj.maxAge || proj.body.position.y < -1) {
+    if (proj.age > proj.maxAge) {
       proj.alive = false;
     }
   }
@@ -61,6 +163,18 @@ export function checkProjectileHits(state: GameState): void {
   for (const proj of state.projectiles) {
     if (!proj.alive) continue;
 
+    // Check if projectile hit the ground (for splash)
+    if (proj.body.position.y < 0.3 && proj.body.velocity.y < 0) {
+      if (proj.splashRadius > 0) {
+        applySplashDamage(state, proj);
+      }
+      proj.alive = false;
+      continue;
+    }
+
+    // Direct hit check
+    const hitRadius = proj.type === "arrow" ? 0.7 : 1.0;
+
     for (const enemy of state.enemies) {
       if (!enemy.alive) continue;
 
@@ -69,37 +183,13 @@ export function checkProjectileHits(state: GameState): void {
       const dz = proj.body.position.z - enemy.body.position.z;
       const distSq = dx * dx + dy * dy + dz * dz;
 
-      // Hit radius: projectile sphere (0.3) + enemy box (~0.5)
-      if (distSq < 1.0) {
-        // Apply damage
-        enemy.hp -= proj.damage;
+      if (distSq < hitRadius * hitRadius) {
+        // Direct hit — full damage + knockback
+        applyDirectHit(state, proj, enemy);
 
-        // Apply knockback impulse — this is the juice
-        const dist = Math.sqrt(distSq) || 0.1;
-        const knockDir = new CANNON.Vec3(dx / dist, 0.4, dz / dist);
-        knockDir.normalize();
-        knockDir.scale(proj.knockback, knockDir);
-        enemy.body.applyImpulse(knockDir, enemy.body.position);
-
-        if (enemy.hp <= 0) {
-          enemy.alive = false;
-          state.wave.kills++;
-          // Death impulse — launch them
-          enemy.body.applyImpulse(
-            new CANNON.Vec3(
-              knockDir.x * 2,
-              15 + Math.random() * 10,
-              knockDir.z * 2,
-            ),
-            enemy.body.position,
-          );
-          // Spin on death
-          enemy.body.angularVelocity.set(
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-          );
-          enemy.body.linearDamping = 0.01;
+        // Fireballs also splash on direct hit
+        if (proj.splashRadius > 0) {
+          applySplashDamage(state, proj, enemy.id);
         }
 
         proj.alive = false;
@@ -107,4 +197,92 @@ export function checkProjectileHits(state: GameState): void {
       }
     }
   }
+}
+
+function applyDirectHit(
+  state: GameState,
+  proj: ProjectileState,
+  enemy: { id: number; body: CANNON.Body; hp: number; alive: boolean },
+): void {
+  enemy.hp -= proj.damage;
+
+  // Knockback impulse from projectile velocity direction
+  const vel = proj.body.velocity;
+  const speed = vel.length() || 1;
+  const knockDir = new CANNON.Vec3(
+    vel.x / speed,
+    0.4,
+    vel.z / speed,
+  );
+  knockDir.normalize();
+  knockDir.scale(proj.knockback, knockDir);
+  enemy.body.applyImpulse(knockDir, enemy.body.position);
+
+  if (enemy.hp <= 0) {
+    killEnemy(state, enemy, knockDir);
+  }
+}
+
+function applySplashDamage(
+  state: GameState,
+  proj: ProjectileState,
+  excludeId?: number,
+): void {
+  const splashPos = proj.body.position;
+
+  for (const enemy of state.enemies) {
+    if (!enemy.alive || enemy.id === excludeId) continue;
+
+    const dx = splashPos.x - enemy.body.position.x;
+    const dy = splashPos.y - enemy.body.position.y;
+    const dz = splashPos.z - enemy.body.position.z;
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+    if (dist < proj.splashRadius) {
+      // Damage falloff: full at center, zero at edge
+      const falloff = 1 - dist / proj.splashRadius;
+      const splashDamage = proj.damage * 0.5 * falloff;
+      enemy.hp -= splashDamage;
+
+      // Shockwave push: enemies get launched outward + upward
+      const pushDir = new CANNON.Vec3(
+        -(dx / (dist || 0.1)),
+        0.6,
+        -(dz / (dist || 0.1)),
+      );
+      pushDir.normalize();
+      pushDir.scale(proj.splashForce * falloff, pushDir);
+      enemy.body.applyImpulse(pushDir, enemy.body.position);
+
+      if (enemy.hp <= 0) {
+        killEnemy(state, enemy, pushDir);
+      }
+    }
+  }
+}
+
+function killEnemy(
+  state: GameState,
+  enemy: { body: CANNON.Body; alive: boolean },
+  knockDir: CANNON.Vec3,
+): void {
+  enemy.alive = false;
+  state.wave.kills++;
+
+  // Death launch
+  enemy.body.applyImpulse(
+    new CANNON.Vec3(
+      knockDir.x * 2,
+      15 + Math.random() * 10,
+      knockDir.z * 2,
+    ),
+    enemy.body.position,
+  );
+  // Ragdoll spin
+  enemy.body.angularVelocity.set(
+    (Math.random() - 0.5) * 20,
+    (Math.random() - 0.5) * 20,
+    (Math.random() - 0.5) * 20,
+  );
+  enemy.body.linearDamping = 0.01;
 }

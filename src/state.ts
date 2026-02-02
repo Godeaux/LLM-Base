@@ -17,6 +17,11 @@ export interface TowerState {
   fireTimer: number;
   damage: number;
   projectileSpeed: number;
+  // Arrow attack
+  arrowFireRate: number;
+  arrowFireTimer: number;
+  arrowDamage: number;
+  arrowSpeed: number;
 }
 
 export interface EnemyState {
@@ -33,6 +38,8 @@ export interface EnemyState {
   type: "walker";
 }
 
+export type ProjectileType = "fireball" | "arrow";
+
 export interface ProjectileState {
   id: number;
   body: CANNON.Body;
@@ -41,6 +48,9 @@ export interface ProjectileState {
   knockback: number;
   age: number;
   maxAge: number;
+  type: ProjectileType;
+  splashRadius: number; // 0 = no splash
+  splashForce: number;
 }
 
 export interface WaveState {
@@ -67,10 +77,15 @@ export function createInitialState(): GameState {
       hp: 10,
       maxHp: 10,
       position: new CANNON.Vec3(0, 0, 0),
-      fireRate: 1.5,
+      fireRate: 1.0,
       fireTimer: 0,
-      damage: 2,
-      projectileSpeed: 25,
+      damage: 2.5,
+      projectileSpeed: 20,
+      // Arrows: faster fire rate, precise, less damage
+      arrowFireRate: 2.5,
+      arrowFireTimer: 0.3, // offset so they don't fire at same time
+      arrowDamage: 1,
+      arrowSpeed: 45,
     },
     enemies: [],
     projectiles: [],

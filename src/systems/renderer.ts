@@ -4,7 +4,7 @@ import { GameState, EnemyState, ProjectileState } from "../state.js";
 
 // Track Three.js objects by entity ID
 const enemyMeshes = new Map<number, THREE.Group>();
-const projectileMeshes = new Map<number, THREE.Mesh>();
+const projectileMeshes = new Map<number, THREE.Object3D>();
 
 // Shared materials
 const BODY_MAT = new THREE.MeshStandardMaterial({ color: 0xcc3333 });
@@ -15,12 +15,18 @@ const FIREBALL_MAT = new THREE.MeshStandardMaterial({
   emissive: 0xff3300,
   emissiveIntensity: 0.8,
 });
+const ARROW_SHAFT_MAT = new THREE.MeshStandardMaterial({ color: 0x8b6914 });
+const ARROW_TIP_MAT = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+const ARROW_FLETCH_MAT = new THREE.MeshStandardMaterial({ color: 0xcc2222 });
 
 // Shared geometries
 const TORSO_GEO = new THREE.BoxGeometry(0.8, 1.0, 0.6);
 const LEG_GEO = new THREE.BoxGeometry(0.25, 0.7, 0.25);
 const HEAD_GEO = new THREE.SphereGeometry(0.3, 6, 4);
-const FIREBALL_GEO = new THREE.SphereGeometry(0.3, 6, 4);
+const FIREBALL_GEO = new THREE.SphereGeometry(0.35, 6, 4);
+const ARROW_SHAFT_GEO = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 4);
+const ARROW_TIP_GEO = new THREE.ConeGeometry(0.06, 0.2, 4);
+const ARROW_FLETCH_GEO = new THREE.BoxGeometry(0.15, 0.01, 0.08);
 
 export function createEnemyMesh(enemy: EnemyState, scene: THREE.Scene): THREE.Group {
   const group = new THREE.Group();
@@ -56,17 +62,45 @@ export function createEnemyMesh(enemy: EnemyState, scene: THREE.Scene): THREE.Gr
   return group;
 }
 
-export function createProjectileMesh(proj: ProjectileState, scene: THREE.Scene): THREE.Mesh {
+function createFireballMesh(proj: ProjectileState, scene: THREE.Scene): THREE.Mesh {
   const mesh = new THREE.Mesh(FIREBALL_GEO, FIREBALL_MAT);
   mesh.castShadow = true;
   scene.add(mesh);
-  projectileMeshes.set(proj.id, mesh);
 
-  // Add a point light for glow
+  // Glow light
   const light = new THREE.PointLight(0xff4400, 2, 8);
   mesh.add(light);
 
+  projectileMeshes.set(proj.id, mesh);
   return mesh;
+}
+
+function createArrowMesh(proj: ProjectileState, scene: THREE.Scene): THREE.Group {
+  const group = new THREE.Group();
+
+  // Shaft (along local Y axis, will be rotated to face velocity)
+  const shaft = new THREE.Mesh(ARROW_SHAFT_GEO, ARROW_SHAFT_MAT);
+  shaft.castShadow = true;
+  group.add(shaft);
+
+  // Tip
+  const tip = new THREE.Mesh(ARROW_TIP_GEO, ARROW_TIP_MAT);
+  tip.position.y = 0.7;
+  tip.castShadow = true;
+  group.add(tip);
+
+  // Fletching (two crossed planes at the back)
+  const fletch1 = new THREE.Mesh(ARROW_FLETCH_GEO, ARROW_FLETCH_MAT);
+  fletch1.position.y = -0.5;
+  group.add(fletch1);
+  const fletch2 = new THREE.Mesh(ARROW_FLETCH_GEO, ARROW_FLETCH_MAT);
+  fletch2.position.y = -0.5;
+  fletch2.rotation.y = Math.PI / 2;
+  group.add(fletch2);
+
+  scene.add(group);
+  projectileMeshes.set(proj.id, group);
+  return group;
 }
 
 export function syncRenderer(state: GameState, scene: THREE.Scene): void {
@@ -103,20 +137,34 @@ export function syncRenderer(state: GameState, scene: THREE.Scene): void {
 
   // Sync projectiles
   for (const proj of state.projectiles) {
-    let mesh = projectileMeshes.get(proj.id);
-    if (!mesh) {
-      mesh = createProjectileMesh(proj, scene);
+    let obj = projectileMeshes.get(proj.id);
+    if (!obj) {
+      obj = proj.type === "arrow"
+        ? createArrowMesh(proj, scene)
+        : createFireballMesh(proj, scene);
     }
 
     const pos = proj.body.position;
-    mesh.position.set(pos.x, pos.y, pos.z);
+    obj.position.set(pos.x, pos.y, pos.z);
 
-    // Spin the fireball
-    mesh.rotation.x += 0.2;
-    mesh.rotation.y += 0.15;
+    if (proj.type === "arrow") {
+      // Orient arrow along its velocity vector
+      const vel = proj.body.velocity;
+      if (vel.length() > 0.5) {
+        const dir = new THREE.Vector3(vel.x, vel.y, vel.z).normalize();
+        // Arrow shaft is along local Y, so we need to rotate Y-up to face dir
+        const up = new THREE.Vector3(0, 1, 0);
+        const quat = new THREE.Quaternion().setFromUnitVectors(up, dir);
+        obj.quaternion.copy(quat);
+      }
+    } else {
+      // Spin the fireball
+      obj.rotation.x += 0.2;
+      obj.rotation.y += 0.15;
+    }
 
     if (!proj.alive) {
-      scene.remove(mesh);
+      scene.remove(obj);
       projectileMeshes.delete(proj.id);
     }
   }
