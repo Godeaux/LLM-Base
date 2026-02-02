@@ -11,10 +11,8 @@
 | **Pitch** | _one-sentence description_ |
 | **References** | _plays like X meets Y_ |
 | **Hook** | _what makes it interesting_ |
-| **Scope** | _jam / vertical slice / full release_ |
-| **Timeline** | _days / weeks / months_ |
-| **Team** | _solo / collaborators_ |
-| **Platform** | _web / desktop / mobile / Steam_ |
+| **Art direction** | _visual style and vibe_ |
+| **Audio direction** | _soundtrack and SFX feel_ |
 
 ---
 
