@@ -1,8 +1,7 @@
 import * as CANNON from "cannon-es";
 import { GameState } from "../state.js";
 import { spawnEnemy } from "../entities/enemy.js";
-
-const REPRIEVE_DURATION = 3;
+import { WAVE } from "../config.js";
 
 export function updateWaves(state: GameState, world: CANNON.World, dt: number): void {
   if (state.tower.hp <= 0) return;
@@ -37,7 +36,7 @@ export function updateWaves(state: GameState, world: CANNON.World, dt: number): 
   const aliveEnemies = state.enemies.filter((e) => e.alive).length;
   if (wave.enemiesSpawned >= wave.enemiesTotal && aliveEnemies === 0) {
     wave.inReprieve = true;
-    wave.reprieveTimer = REPRIEVE_DURATION;
+    wave.reprieveTimer = WAVE.reprieveDuration;
   }
 }
 
@@ -45,8 +44,8 @@ function startNextWave(state: GameState): void {
   state.wave.number++;
   const n = state.wave.number;
   state.wave.enemiesSpawned = 0;
-  state.wave.enemiesTotal = Math.floor(5 + n * 3 + n * n * 0.5);
+  state.wave.enemiesTotal = Math.floor(WAVE.baseEnemies + n * WAVE.linearScale + n * n * WAVE.quadraticScale);
   state.wave.spawnTimer = 0;
-  state.wave.spawnInterval = Math.max(0.3, 1.5 - n * 0.08);
+  state.wave.spawnInterval = Math.max(0.3, WAVE.spawnInterval - n * 0.08);
   state.wave.enemiesRemaining = 0;
 }

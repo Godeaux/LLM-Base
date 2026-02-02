@@ -1,4 +1,5 @@
 import * as CANNON from "cannon-es";
+import { PHYSICS } from "../config.js";
 
 // Collision groups
 export const GROUP_GROUND = 1;
@@ -8,7 +9,7 @@ export const GROUP_PROJECTILE = 8;
 
 export function createPhysicsWorld(): CANNON.World {
   const world = new CANNON.World();
-  world.gravity.set(0, -20, 0);
+  world.gravity.set(0, -PHYSICS.gravity, 0);
   world.broadphase = new CANNON.NaiveBroadphase();
   world.allowSleep = false;
 

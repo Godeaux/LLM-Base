@@ -1,5 +1,6 @@
 import * as CANNON from "cannon-es";
 import { GameState, ProjectileState } from "../state.js";
+import { FIREBALL, ARROW, DEATH } from "../config.js";
 
 export function checkProjectileHits(state: GameState): void {
   for (const proj of state.projectiles) {
@@ -15,7 +16,7 @@ export function checkProjectileHits(state: GameState): void {
     }
 
     // Direct hit check
-    const hitRadius = proj.type === "arrow" ? 0.7 : 1.0;
+    const hitRadius = proj.type === "arrow" ? ARROW.hitRadius : FIREBALL.hitRadius;
 
     for (const enemy of state.enemies) {
       if (!enemy.alive) continue;
@@ -81,7 +82,7 @@ function applySplashDamage(
 
     if (dist < proj.splashRadius) {
       const falloff = 1 - dist / proj.splashRadius;
-      const splashDamage = proj.damage * 0.5 * falloff;
+      const splashDamage = proj.damage * FIREBALL.splashDamageMult * falloff;
       enemy.hp -= splashDamage;
 
       // Shockwave push: enemies get launched outward + upward
@@ -112,17 +113,17 @@ function killEnemy(
   // Death launch
   enemy.body.applyImpulse(
     new CANNON.Vec3(
-      knockDir.x * 2,
-      15 + Math.random() * 10,
-      knockDir.z * 2,
+      knockDir.x * DEATH.launchSideMult,
+      DEATH.launchUpMin + Math.random() * (DEATH.launchUpMax - DEATH.launchUpMin),
+      knockDir.z * DEATH.launchSideMult,
     ),
     enemy.body.position,
   );
   // Ragdoll spin
   enemy.body.angularVelocity.set(
-    (Math.random() - 0.5) * 20,
-    (Math.random() - 0.5) * 20,
-    (Math.random() - 0.5) * 20,
+    (Math.random() - 0.5) * DEATH.ragdollSpin,
+    (Math.random() - 0.5) * DEATH.ragdollSpin,
+    (Math.random() - 0.5) * DEATH.ragdollSpin,
   );
   enemy.body.linearDamping = 0.01;
 }

@@ -1,5 +1,6 @@
 import * as CANNON from "cannon-es";
 import { EnemyState, GameState } from "../state.js";
+import { LIGHTNING } from "../config.js";
 
 /**
  * Fire a chain lightning bolt from the tower to the nearest enemy,
@@ -53,7 +54,7 @@ export function fireLightning(state: GameState): void {
   state.lightningArcs.push({
     points,
     age: 0,
-    maxAge: 0.25,
+    maxAge: LIGHTNING.arcFadeTime,
   });
 }
 

@@ -1,4 +1,5 @@
 import * as CANNON from "cannon-es";
+import { TOWER, FIREBALL, ARROW, ARCANE, LIGHTNING } from "./config.js";
 
 export interface GameState {
   tower: TowerState;
@@ -99,30 +100,28 @@ export function nextEntityId(): number {
 export function createInitialState(): GameState {
   return {
     tower: {
-      hp: 10,
-      maxHp: 10,
+      hp: TOWER.hp,
+      maxHp: TOWER.maxHp,
       position: new CANNON.Vec3(0, 0, 0),
-      fireRate: 1.0,
+      // Runtime fire timers (staggered so attacks don't all fire on frame 1)
+      fireRate: FIREBALL.fireRate,
       fireTimer: 0,
-      damage: 2.5,
-      projectileSpeed: 20,
-      // Arrows: faster fire rate, precise, less damage
-      arrowFireRate: 2.5,
-      arrowFireTimer: 0.3, // offset so they don't fire at same time
-      arrowDamage: 1,
-      arrowSpeed: 45,
-      // Arcane bolt: slow, homing, guaranteed hit
-      arcaneFireRate: 0.8,
+      damage: FIREBALL.damage,
+      projectileSpeed: FIREBALL.speed,
+      arrowFireRate: ARROW.fireRate,
+      arrowFireTimer: 0.3,
+      arrowDamage: ARROW.damage,
+      arrowSpeed: ARROW.speed,
+      arcaneFireRate: ARCANE.fireRate,
       arcaneFireTimer: 0.6,
-      arcaneDamage: 1.8,
-      arcaneSpeed: 12,
-      // Lightning: instant chain zap
-      lightningFireRate: 0.6,
+      arcaneDamage: ARCANE.damage,
+      arcaneSpeed: ARCANE.speed,
+      lightningFireRate: LIGHTNING.fireRate,
       lightningFireTimer: 0.9,
-      lightningDamage: 0.8,
-      lightningChains: 3,
-      lightningChainRange: 8,
-      lightningStunDuration: 0.4,
+      lightningDamage: LIGHTNING.damage,
+      lightningChains: LIGHTNING.chains,
+      lightningChainRange: LIGHTNING.chainRange,
+      lightningStunDuration: LIGHTNING.stunDuration,
       attackToggles: { fireball: true, arrow: true, arcane: true, lightning: true },
     },
     enemies: [],

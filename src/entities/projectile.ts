@@ -1,6 +1,7 @@
 import * as CANNON from "cannon-es";
 import { GameState, ProjectileState, ProjectileType, nextEntityId } from "../state.js";
 import { GROUP_ENEMY, GROUP_GROUND, GROUP_PROJECTILE } from "../systems/physics.js";
+import { FIREBALL, ARROW, ARCANE, PHYSICS } from "../config.js";
 
 interface LaunchConfig {
   speed: number;
@@ -17,35 +18,32 @@ interface LaunchConfig {
 }
 
 const FIREBALL_CONFIG: LaunchConfig = {
-  speed: 20,
-  damage: 2.5,
-  knockback: 22,
+  speed: FIREBALL.speed,
+  damage: FIREBALL.damage,
+  knockback: FIREBALL.knockback,
   type: "fireball",
-  splashRadius: 5,
-  splashForce: 14,
-  radius: 0.35,
-  mass: 2,
-  launchAngleMin: Math.PI / 5,
-  launchAngleMax: Math.PI / 3,
-  maxAge: 6,
+  splashRadius: FIREBALL.splashRadius,
+  splashForce: FIREBALL.splashForce,
+  radius: FIREBALL.projectileRadius,
+  mass: FIREBALL.mass,
+  launchAngleMin: FIREBALL.launchAngleMin,
+  launchAngleMax: FIREBALL.launchAngleMax,
+  maxAge: FIREBALL.maxAge,
 };
 
 const ARROW_CONFIG: LaunchConfig = {
-  speed: 45,
-  damage: 1,
-  knockback: 8,
+  speed: ARROW.speed,
+  damage: ARROW.damage,
+  knockback: ARROW.knockback,
   type: "arrow",
   splashRadius: 0,
   splashForce: 0,
-  radius: 0.1,
-  mass: 0.3,
-  launchAngleMin: Math.PI / 12,
-  launchAngleMax: Math.PI / 5,
-  maxAge: 4,
+  radius: ARROW.projectileRadius,
+  mass: ARROW.mass,
+  launchAngleMin: ARROW.launchAngleMin,
+  launchAngleMax: ARROW.launchAngleMax,
+  maxAge: ARROW.maxAge,
 };
-
-const ARCANE_SPEED = 12;
-const ARCANE_STEER_FORCE = 280;
 
 /**
  * Iterative lead-target prediction.
@@ -110,7 +108,7 @@ export function fireProjectile(
     config.launchAngleMin + (config.launchAngleMax - config.launchAngleMin) * distFactor;
 
   const predicted = predictIntercept(
-    origin, targetPos, targetVel, config.speed, 20, launchAngle,
+    origin, targetPos, targetVel, config.speed, PHYSICS.gravity, launchAngle,
   );
 
   const pdx = predicted.x - origin.x;
@@ -161,13 +159,13 @@ function fireArcaneBolt(
   const dist = Math.sqrt(dx * dx + dz * dz) || 1;
 
   const body = new CANNON.Body({
-    mass: 0.5,
-    shape: new CANNON.Sphere(0.2),
+    mass: ARCANE.mass,
+    shape: new CANNON.Sphere(ARCANE.projectileRadius),
     position: origin.clone(),
     velocity: new CANNON.Vec3(
-      (dx / dist) * ARCANE_SPEED * 0.4,
-      ARCANE_SPEED * 0.6,
-      (dz / dist) * ARCANE_SPEED * 0.4,
+      (dx / dist) * ARCANE.speed * ARCANE.initialSpeedFractionXZ,
+      ARCANE.speed * ARCANE.initialSpeedFractionY,
+      (dz / dist) * ARCANE.speed * ARCANE.initialSpeedFractionXZ,
     ),
     collisionFilterGroup: GROUP_PROJECTILE,
     collisionFilterMask: GROUP_ENEMY,
@@ -180,10 +178,10 @@ function fireArcaneBolt(
     id: nextEntityId(),
     body,
     alive: true,
-    damage: 1.8,
-    knockback: 6,
+    damage: ARCANE.damage,
+    knockback: ARCANE.knockback,
     age: 0,
-    maxAge: 8,
+    maxAge: ARCANE.maxAge,
     type: "arcane",
     splashRadius: 0,
     splashForce: 0,
@@ -196,7 +194,7 @@ export function updateArcaneHoming(state: GameState): void {
     if (!proj.alive || proj.type !== "arcane") continue;
 
     // Cancel gravity so arcane bolts float
-    proj.body.force.y += 20 * proj.body.mass;
+    proj.body.force.y += PHYSICS.gravity * proj.body.mass;
 
     if (proj.targetId === null) continue;
 
@@ -229,17 +227,17 @@ export function updateArcaneHoming(state: GameState): void {
 
     proj.body.applyForce(
       new CANNON.Vec3(
-        (dx / dist) * ARCANE_STEER_FORCE,
-        (dy / dist) * ARCANE_STEER_FORCE,
-        (dz / dist) * ARCANE_STEER_FORCE,
+        (dx / dist) * ARCANE.steerForce,
+        (dy / dist) * ARCANE.steerForce,
+        (dz / dist) * ARCANE.steerForce,
       ),
       proj.body.position,
     );
 
     const vel = proj.body.velocity;
     const speed = vel.length();
-    if (speed > ARCANE_SPEED) {
-      const scale = ARCANE_SPEED / speed;
+    if (speed > ARCANE.speed) {
+      const scale = ARCANE.speed / speed;
       vel.x *= scale;
       vel.y *= scale;
       vel.z *= scale;
