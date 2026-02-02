@@ -10,6 +10,7 @@ import { updateLightningArcs } from "./systems/lightning.js";
 import { updateWaves } from "./systems/waves.js";
 import { syncRenderer, cleanupDeadEntities } from "./systems/renderer.js";
 import { createHUD, updateHUD } from "./systems/hud.js";
+import { PHYSICS } from "./config.js";
 
 // --- Renderer ---
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -135,7 +136,7 @@ window.addEventListener("resize", () => {
 });
 
 // --- Fixed timestep game loop ---
-const PHYSICS_DT = 1 / 60;
+const PHYSICS_DT = PHYSICS.tickRate;
 let accumulator = 0;
 let lastTime = performance.now();
 

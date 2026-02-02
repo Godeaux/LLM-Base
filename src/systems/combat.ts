@@ -1,7 +1,17 @@
 import * as CANNON from "cannon-es";
-import { EnemyState, GameState } from "../state.js";
+import { EnemyState, GameState, ProjectileType } from "../state.js";
 import { fireProjectile } from "../entities/projectile.js";
 import { fireLightning } from "./lightning.js";
+
+/** Targeting strategy per projectile attack type. */
+const TARGET_STRATEGY: Record<
+  ProjectileType,
+  (enemies: EnemyState[], pos: CANNON.Vec3) => EnemyState | null
+> = {
+  fireball: findBestFireballTarget,
+  arrow: findNearestEnemy,
+  arcane: findFarthestEnemy,
+};
 
 export function updateTowerCombat(state: GameState, world: CANNON.World, dt: number): void {
   if (state.tower.hp <= 0) return;
@@ -9,69 +19,37 @@ export function updateTowerCombat(state: GameState, world: CANNON.World, dt: num
   const aliveEnemies = state.enemies.filter((e) => e.alive);
   if (aliveEnemies.length === 0) return;
 
-  const toggles = state.tower.attackToggles;
+  const attacks = state.tower.attacks;
 
-  // --- Fireball: slower, targets clusters for splash value ---
-  if (toggles.fireball) {
-    state.tower.fireTimer -= dt;
-    if (state.tower.fireTimer <= 0) {
-      const target = findBestFireballTarget(aliveEnemies, state.tower.position);
+  // --- Projectile attacks (fireball, arrow, arcane) ---
+  for (const type of ["fireball", "arrow", "arcane"] as const) {
+    const atk = attacks[type];
+    if (!atk.enabled) continue;
+    atk.fireTimer -= dt;
+    if (atk.fireTimer <= 0) {
+      const findTarget = TARGET_STRATEGY[type];
+      const target = findTarget(aliveEnemies, state.tower.position);
       if (target) {
         const proj = fireProjectile(
-          state, world,
+          world,
           target.body.position.clone(),
           target.body.velocity.clone(),
-          "fireball",
+          type,
+          type === "arcane" ? target.id : undefined,
         );
         state.projectiles.push(proj);
       }
-      state.tower.fireTimer = 1 / state.tower.fireRate;
-    }
-  }
-
-  // --- Arrow: faster, targets nearest enemy ---
-  if (toggles.arrow) {
-    state.tower.arrowFireTimer -= dt;
-    if (state.tower.arrowFireTimer <= 0) {
-      const target = findNearestEnemy(aliveEnemies, state.tower.position);
-      if (target) {
-        const proj = fireProjectile(
-          state, world,
-          target.body.position.clone(),
-          target.body.velocity.clone(),
-          "arrow",
-        );
-        state.projectiles.push(proj);
-      }
-      state.tower.arrowFireTimer = 1 / state.tower.arrowFireRate;
-    }
-  }
-
-  // --- Arcane bolt: homing, targets farthest enemy ---
-  if (toggles.arcane) {
-    state.tower.arcaneFireTimer -= dt;
-    if (state.tower.arcaneFireTimer <= 0) {
-      const target = findFarthestEnemy(aliveEnemies, state.tower.position);
-      if (target) {
-        const proj = fireProjectile(
-          state, world,
-          target.body.position.clone(),
-          target.body.velocity.clone(),
-          "arcane",
-          target.id,
-        );
-        state.projectiles.push(proj);
-      }
-      state.tower.arcaneFireTimer = 1 / state.tower.arcaneFireRate;
+      atk.fireTimer = 1 / atk.fireRate;
     }
   }
 
   // --- Lightning: instant chain zap ---
-  if (toggles.lightning) {
-    state.tower.lightningFireTimer -= dt;
-    if (state.tower.lightningFireTimer <= 0) {
+  const lightning = attacks.lightning;
+  if (lightning.enabled) {
+    lightning.fireTimer -= dt;
+    if (lightning.fireTimer <= 0) {
       fireLightning(state);
-      state.tower.lightningFireTimer = 1 / state.tower.lightningFireRate;
+      lightning.fireTimer = 1 / lightning.fireRate;
     }
   }
 }

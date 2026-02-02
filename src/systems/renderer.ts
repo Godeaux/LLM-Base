@@ -16,6 +16,11 @@ const lightningLines: THREE.Line[] = [];
 
 const LIGHTNING_MAT = new THREE.LineBasicMaterial({ color: 0x88ccff, linewidth: 2 });
 
+// Reusable temp objects to avoid per-frame allocations
+const _arrowDir = new THREE.Vector3();
+const _arrowUp = new THREE.Vector3(0, 1, 0);
+const _arrowQuat = new THREE.Quaternion();
+
 export function syncRenderer(state: GameState, scene: THREE.Scene): void {
   syncEnemies(state, scene);
   syncProjectiles(state, scene);
@@ -121,16 +126,19 @@ function syncArcaneVisuals(obj: THREE.Object3D, id: number, pos: CANNON.Vec3): v
 
 function syncArrowVisuals(obj: THREE.Object3D, velocity: CANNON.Vec3): void {
   if (velocity.length() > 0.5) {
-    const dir = new THREE.Vector3(velocity.x, velocity.y, velocity.z).normalize();
-    const up = new THREE.Vector3(0, 1, 0);
-    const quat = new THREE.Quaternion().setFromUnitVectors(up, dir);
-    obj.quaternion.copy(quat);
+    _arrowDir.set(velocity.x, velocity.y, velocity.z).normalize();
+    _arrowQuat.setFromUnitVectors(_arrowUp, _arrowDir);
+    obj.quaternion.copy(_arrowQuat);
   }
 }
 
 function syncLightning(state: GameState, scene: THREE.Scene): void {
-  // Remove old lines
-  for (const line of lightningLines) scene.remove(line);
+  // Remove and dispose old lines (free GPU buffers)
+  for (const line of lightningLines) {
+    scene.remove(line);
+    line.geometry.dispose();
+    (line.material as THREE.Material).dispose();
+  }
   lightningLines.length = 0;
 
   for (const arc of state.lightningArcs) {
@@ -166,19 +174,33 @@ function syncLightning(state: GameState, scene: THREE.Scene): void {
 }
 
 export function cleanupDeadEntities(state: GameState, world: CANNON.World): void {
-  for (let i = state.enemies.length - 1; i >= 0; i--) {
-    const enemy = state.enemies[i]!;
+  // Swap-and-pop: O(1) removal instead of O(n) splice
+  swapRemove(state.enemies, (enemy) => {
     if (!enemy.alive && !enemyMeshes.has(enemy.id)) {
       world.removeBody(enemy.body);
-      state.enemies.splice(i, 1);
+      return true;
     }
-  }
+    return false;
+  });
 
-  for (let i = state.projectiles.length - 1; i >= 0; i--) {
-    const proj = state.projectiles[i]!;
+  swapRemove(state.projectiles, (proj) => {
     if (!proj.alive && !projectileMeshes.has(proj.id)) {
       world.removeBody(proj.body);
-      state.projectiles.splice(i, 1);
+      return true;
+    }
+    return false;
+  });
+}
+
+/** Remove items from an array in O(1) per removal by swapping with the last element. */
+function swapRemove<T>(arr: T[], shouldRemove: (item: T) => boolean): void {
+  let i = 0;
+  while (i < arr.length) {
+    if (shouldRemove(arr[i]!)) {
+      arr[i] = arr[arr.length - 1]!;
+      arr.pop();
+    } else {
+      i++;
     }
   }
 }

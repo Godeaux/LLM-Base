@@ -74,10 +74,10 @@ export function createHUD(state: GameState): void {
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.checked = state.tower.attackToggles[type];
+    checkbox.checked = state.tower.attacks[type].enabled;
     checkbox.style.cssText = `accent-color: ${info.color}; cursor: pointer;`;
     checkbox.addEventListener("change", () => {
-      state.tower.attackToggles[type] = checkbox.checked;
+      state.tower.attacks[type].enabled = checkbox.checked;
     });
 
     const label = document.createElement("span");

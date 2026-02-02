@@ -1,6 +1,13 @@
 import * as CANNON from "cannon-es";
 import { GameState, ProjectileState } from "../state.js";
-import { FIREBALL, ARROW, DEATH } from "../config.js";
+import { FIREBALL, ARROW, ARCANE, DEATH } from "../config.js";
+
+/** Per-type hit detection radius. */
+const HIT_RADIUS: Record<string, number> = {
+  fireball: FIREBALL.hitRadius,
+  arrow: ARROW.hitRadius,
+  arcane: ARCANE.hitRadius,
+};
 
 export function checkProjectileHits(state: GameState): void {
   for (const proj of state.projectiles) {
@@ -16,7 +23,7 @@ export function checkProjectileHits(state: GameState): void {
     }
 
     // Direct hit check
-    const hitRadius = proj.type === "arrow" ? ARROW.hitRadius : FIREBALL.hitRadius;
+    const hitRadius = HIT_RADIUS[proj.type] ?? FIREBALL.hitRadius;
 
     for (const enemy of state.enemies) {
       if (!enemy.alive) continue;
@@ -102,7 +109,7 @@ function applySplashDamage(
   }
 }
 
-function killEnemy(
+export function killEnemy(
   state: GameState,
   enemy: { body: CANNON.Body; alive: boolean },
   knockDir: CANNON.Vec3,

@@ -84,7 +84,6 @@ function predictIntercept(
 }
 
 export function fireProjectile(
-  _state: GameState,
   world: CANNON.World,
   targetPos: CANNON.Vec3,
   targetVel: CANNON.Vec3,

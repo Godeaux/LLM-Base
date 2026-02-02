@@ -1,5 +1,5 @@
 import * as CANNON from "cannon-es";
-import { TOWER, FIREBALL, ARROW, ARCANE, LIGHTNING } from "./config.js";
+import { TOWER, FIREBALL, ARROW, ARCANE, LIGHTNING, WAVE } from "./config.js";
 
 export interface GameState {
   tower: TowerState;
@@ -11,33 +11,21 @@ export interface GameState {
   deltaTime: number;
 }
 
+/**
+ * Per-attack runtime state. fireRate + fireTimer live here so upgrades
+ * can mutate them independently of the base config values.
+ */
+export interface AttackRuntimeState {
+  fireRate: number;     // shots (or zaps) per second — mutable by upgrades
+  fireTimer: number;    // countdown to next shot
+  enabled: boolean;     // debug toggle
+}
+
 export interface TowerState {
   hp: number;
   maxHp: number;
   position: CANNON.Vec3;
-  fireRate: number; // shots per second
-  fireTimer: number;
-  damage: number;
-  projectileSpeed: number;
-  // Arrow attack
-  arrowFireRate: number;
-  arrowFireTimer: number;
-  arrowDamage: number;
-  arrowSpeed: number;
-  // Arcane bolt attack
-  arcaneFireRate: number;
-  arcaneFireTimer: number;
-  arcaneDamage: number;
-  arcaneSpeed: number;
-  // Lightning attack
-  lightningFireRate: number;
-  lightningFireTimer: number;
-  lightningDamage: number;
-  lightningChains: number; // how many enemies it jumps to
-  lightningChainRange: number;
-  lightningStunDuration: number;
-  // Debug toggles
-  attackToggles: Record<AttackType, boolean>;
+  attacks: Record<AttackType, AttackRuntimeState>;
 }
 
 export interface EnemyState {
@@ -103,26 +91,12 @@ export function createInitialState(): GameState {
       hp: TOWER.hp,
       maxHp: TOWER.maxHp,
       position: new CANNON.Vec3(0, 0, 0),
-      // Runtime fire timers (staggered so attacks don't all fire on frame 1)
-      fireRate: FIREBALL.fireRate,
-      fireTimer: 0,
-      damage: FIREBALL.damage,
-      projectileSpeed: FIREBALL.speed,
-      arrowFireRate: ARROW.fireRate,
-      arrowFireTimer: 0.3,
-      arrowDamage: ARROW.damage,
-      arrowSpeed: ARROW.speed,
-      arcaneFireRate: ARCANE.fireRate,
-      arcaneFireTimer: 0.6,
-      arcaneDamage: ARCANE.damage,
-      arcaneSpeed: ARCANE.speed,
-      lightningFireRate: LIGHTNING.fireRate,
-      lightningFireTimer: 0.9,
-      lightningDamage: LIGHTNING.damage,
-      lightningChains: LIGHTNING.chains,
-      lightningChainRange: LIGHTNING.chainRange,
-      lightningStunDuration: LIGHTNING.stunDuration,
-      attackToggles: { fireball: true, arrow: true, arcane: true, lightning: true },
+      attacks: {
+        fireball:  { fireRate: FIREBALL.fireRate,  fireTimer: 0,   enabled: true },
+        arrow:     { fireRate: ARROW.fireRate,     fireTimer: 0.3, enabled: true },
+        arcane:    { fireRate: ARCANE.fireRate,     fireTimer: 0.6, enabled: true },
+        lightning: { fireRate: LIGHTNING.fireRate,  fireTimer: 0.9, enabled: true },
+      },
     },
     enemies: [],
     projectiles: [],
@@ -131,9 +105,9 @@ export function createInitialState(): GameState {
       number: 1,
       enemiesRemaining: 0,
       enemiesSpawned: 0,
-      enemiesTotal: 5,
+      enemiesTotal: WAVE.baseEnemies,
       spawnTimer: 0,
-      spawnInterval: 1.5,
+      spawnInterval: WAVE.spawnInterval,
       reprieveTimer: 0,
       inReprieve: false,
       kills: 0,

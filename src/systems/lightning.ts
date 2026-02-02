@@ -1,6 +1,7 @@
 import * as CANNON from "cannon-es";
 import { EnemyState, GameState } from "../state.js";
 import { LIGHTNING } from "../config.js";
+import { killEnemy } from "./damage.js";
 
 /**
  * Fire a chain lightning bolt from the tower to the nearest enemy,
@@ -20,8 +21,8 @@ export function fireLightning(state: GameState): void {
 
   // Chain to nearby enemies
   let current = first;
-  for (let i = 1; i < tower.lightningChains; i++) {
-    const next = findNearestExcluding(aliveEnemies, current.body.position, hit, tower.lightningChainRange);
+  for (let i = 1; i < LIGHTNING.chains; i++) {
+    const next = findNearestExcluding(aliveEnemies, current.body.position, hit, LIGHTNING.chainRange);
     if (!next) break;
     chainTargets.push(next);
     hit.add(next.id);
@@ -30,18 +31,17 @@ export function fireLightning(state: GameState): void {
 
   // Apply damage and stun to all chained enemies
   for (const enemy of chainTargets) {
-    enemy.hp -= tower.lightningDamage;
-    enemy.stunTimer = Math.max(enemy.stunTimer, tower.lightningStunDuration);
+    enemy.hp -= LIGHTNING.damage;
+    enemy.stunTimer = Math.max(enemy.stunTimer, LIGHTNING.stunDuration);
 
     if (enemy.hp <= 0 && enemy.alive) {
-      enemy.alive = false;
-      state.wave.kills++;
-      // Small upward launch on lightning kill
-      enemy.body.velocity.set(
-        (Math.random() - 0.5) * 4,
-        6,
-        (Math.random() - 0.5) * 4,
+      // Use a small upward knock direction for the death ragdoll
+      const knockDir = new CANNON.Vec3(
+        (Math.random() - 0.5) * 2,
+        1,
+        (Math.random() - 0.5) * 2,
       );
+      killEnemy(state, enemy, knockDir);
     }
   }
 
