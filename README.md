@@ -1,65 +1,22 @@
-# Game Foundation
+# Idle TD
 
-Minimal starting point for LLM-assisted game development. Clone it, open your AI coding tool, and describe the game you want to build.
-
-## How It Works
-
-This repo is designed to be **rewritten by an LLM** based on your game idea. The `.llm/` folder contains instructions that guide the AI through a structured conversation:
-
-1. **You describe your game** — even a rough idea is fine
-2. **The AI asks clarifying questions** — vision, gameplay, technical scope
-3. **You answer** — briefly, in your own words
-4. **The AI rewrites this repo** — package.json, tsconfig, src/index.ts, and the docs all get tailored to your specific game
-5. **You start building** — with a configured foundation instead of a blank slate
+A 3D physics-based idle tower defense game. A central tower defends against waves of enemies approaching from all directions using elemental attacks — chain lightning, fireballs, blizzard gusts, arcing arrows, and summonable minions. Built with Three.js and cannon-es for physics-driven spectacle: arcing projectiles, ragdoll knockback, bipedal walkers, and flapping flyers.
 
 ## Quick Start
 
-1. Clone this repo
-2. Open it in your AI coding editor (Windsurf, Cursor, VS Code + Claude, etc.)
-3. Say: *"I want to build [your game idea]. Let's get started."*
-4. Answer the questions
-5. The AI configures everything, then you run `npm install && npm run dev`
-
-That's it. The AI reads `.llm/BOOTSTRAP.md` and handles the rest.
-
-## What's in the Box
-
-```
-.llm/
-  BOOTSTRAP.md   → Instructions for the AI (drives the initial conversation)
-  DISCOVERY.md   → Design document (filled in during bootstrap)
-  DECISIONS.md   → Technical decisions log (filled in during bootstrap)
-  PERSONAS.md    → Specialized roles the AI can adopt during development
-  PRINCIPLES.md  → Development guidelines
-src/
-  index.ts       → Empty entry point (rewritten during bootstrap)
-tests/           → Test suite directory
+```bash
+npm install
+npm run dev
 ```
 
-### Before bootstrap: a template
-### After bootstrap: your game's foundation
-
-## Personas
-
-Once the foundation is configured, invoke specialized expertise during development:
-
-| Persona | Focus |
-|---------|-------|
-| `@architect` | Structure, performance, technical decisions |
-| `@gameplay` | Core loop, fun, balance, progression |
-| `@ui` | Interface, input, feedback, accessibility |
-| `@systems` | Individual game systems, data design |
-| `@network` | Multiplayer, synchronization, infrastructure |
-| `@quality` | Testing, debugging, stability |
-
-**Example:** *"@gameplay The combat feels flat. How do we add more impact?"*
+Open `http://localhost:5173` in your browser. Orbit the camera with mouse drag.
 
 ## Scripts
 
 | Command | Purpose |
 |---------|---------|
-| `npm run dev` | Start dev server (configured during bootstrap) |
-| `npm run build` | Type-check with TypeScript |
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Type-check + production build |
 | `npm run lint` | Lint with ESLint |
 | `npm run lint:fix` | Auto-fix lint issues |
 | `npm run format` | Format with Prettier |
@@ -67,14 +24,13 @@ Once the foundation is configured, invoke specialized expertise during developme
 | `npm test` | Run tests with Vitest |
 | `npm run test:watch` | Run tests in watch mode |
 
-## Principles (summary)
+## Tech Stack
 
-- Grow structure, don't prescribe it
-- Small files, clear names
-- Data over behavior
-- Explicit over clever
-- Ask before building
-- Iterate in playable increments
-- Make it work, make it right, make it fast (in that order)
+- **Three.js** — 3D rendering, procedural low-poly geometry
+- **cannon-es** — Physics (rigid bodies, constraints, collision)
+- **TypeScript** + **Vite** — Build tooling
+- **Plain HTML/CSS** — UI overlay
 
-See `.llm/PRINCIPLES.md` for full details.
+## Project Structure
+
+See `.llm/DISCOVERY.md` for design details and `.llm/DECISIONS.md` for technical rationale.
