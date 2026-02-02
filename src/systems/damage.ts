@@ -67,7 +67,7 @@ function applyDirectHit(
   knockDir.scale(proj.knockback, knockDir);
   enemy.body.applyImpulse(knockDir, enemy.body.position);
 
-  if (enemy.hp <= 0) {
+  if (enemy.hp <= 0 && enemy.alive) {
     killEnemy(state, enemy, knockDir);
   }
 }
@@ -102,7 +102,7 @@ function applySplashDamage(
       pushDir.scale(proj.splashForce * falloff, pushDir);
       enemy.body.applyImpulse(pushDir, enemy.body.position);
 
-      if (enemy.hp <= 0) {
+      if (enemy.hp <= 0 && enemy.alive) {
         killEnemy(state, enemy, pushDir);
       }
     }
