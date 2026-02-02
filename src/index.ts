@@ -1,15 +1,13 @@
 /**
  * Game Foundation - Entry Point
  *
- * This file is intentionally empty.
+ * This file is intentionally empty. It gets rewritten during bootstrap.
  *
  * To begin:
- * 1. Read .llm/DISCOVERY.md
- * 2. Start a conversation: "I want to build [concept]. Let's start with @architect to scope it."
- * 3. Answer the discovery questions
- * 4. Build incrementally from first playable
- *
- * Structure will emerge from your game's actual needs.
+ * 1. Open this project in your AI coding editor
+ * 2. Say: "I want to build [your game idea]. Let's get started."
+ * 3. The AI reads .llm/BOOTSTRAP.md and walks you through setup
+ * 4. This file becomes your game's entry point
  */
 
 export {};
