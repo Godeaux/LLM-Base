@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Block commits if .llm/DISCOVERY.md hasn't been filled in.
+# This ensures the bootstrap conversation happens before any real code lands.
+
+DISCOVERY=".llm/DISCOVERY.md"
+
+if [ ! -f "$DISCOVERY" ]; then
+  echo ""
+  echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md not found."
+  echo ""
+  echo "Run the bootstrap process first:"
+  echo "  1. Open your AI coding editor"
+  echo "  2. Describe your game idea"
+  echo "  3. Answer the discovery questions"
+  echo "  4. The AI will fill in DISCOVERY.md, then you can commit"
+  echo ""
+  exit 1
+fi
+
+# Check if the template placeholders are still present
+if grep -q "_one-sentence description_" "$DISCOVERY" || grep -q "_plays like X meets Y_" "$DISCOVERY" || grep -q "_what the player DOES_" "$DISCOVERY"; then
+  echo ""
+  echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md is still in template form."
+  echo ""
+  echo "The bootstrap conversation hasn't been completed yet."
+  echo "Before writing code, the AI needs to ask you questions and fill in"
+  echo "the discovery document. Start by describing your game idea."
+  echo ""
+  echo "Unfilled fields detected in:"
+  grep -n "^|.*|.*_.*_.*|" "$DISCOVERY" | head -10
+  echo ""
+  echo "To skip this check (not recommended): git commit --no-verify"
+  exit 1
+fi

@@ -83,43 +83,31 @@ End with: *"Does this stack sound right to you, or do you have preferences I sho
 
 ## Step 5: Rewrite the Foundation
 
-Only after the user confirms (or adjusts) the tech stack, rewrite these files:
+Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
-### Files to rewrite:
+**⚠️ You MUST fill in `.llm/DISCOVERY.md` FIRST.** The pre-commit hook will block commits if it still contains template placeholders. `src/index.ts` also contains a blocker comment — only replace it after DISCOVERY.md is complete.
 
-1. **`package.json`**
-   - Update `name` to match the game
-   - Add chosen renderer/physics/audio as dependencies
-   - Update `dev` script to actually start a Vite dev server (or whatever was chosen)
-   - Keep existing lint/format/test scripts
+### Order of operations:
 
-2. **`tsconfig.json`**
-   - Adjust for chosen framework (JSX if needed, path aliases, etc.)
+1. **`.llm/DISCOVERY.md`** — Fill in ALL blank fields with the user's actual answers. This unlocks everything else (the pre-commit hook checks for template placeholders like `_one-sentence description_`).
 
-3. **`eslint.config.js`**
-   - Add framework-specific plugins if needed
+2. **`.llm/DECISIONS.md`** — Fill in the tech stack table with choices and reasoning. Fill in dependencies with alternatives that were considered. Add architecture notes.
 
-4. **`src/index.ts`**
-   - Replace empty export with a minimal "hello world" for the chosen renderer
-   - Initialize the renderer, create a basic scene, show SOMETHING on screen
-   - Keep it under 40 lines — this is proof-of-life, not the game
+3. **`package.json`** — Update `name` to match the game. Add chosen renderer/physics/audio as dependencies. Update `dev` script to actually start a Vite dev server (or whatever was chosen). Keep existing lint/format/test scripts.
 
-5. **`.llm/DECISIONS.md`**
-   - Fill in the tech stack table with choices and reasoning
-   - Fill in dependencies with alternatives that were considered
-   - Add architecture notes
+4. **`tsconfig.json`** — Adjust for chosen framework (JSX if needed, path aliases, etc.)
 
-6. **`.llm/DISCOVERY.md`**
-   - Fill in all the blank fields with the user's actual answers
+5. **`eslint.config.js`** — Add framework-specific plugins if needed.
 
-7. **`README.md`**
-   - Rewrite to describe THIS game, not the template
-   - Keep the scripts table, update everything else
+6. **`src/index.ts`** — NOW you can replace the blocker comment and empty export with a minimal "hello world" for the chosen renderer. Initialize the renderer, create a basic scene, show SOMETHING on screen. Keep it under 40 lines — this is proof-of-life, not the game.
+
+7. **`README.md`** — Rewrite to describe THIS game, not the template. Keep the scripts table, update everything else.
 
 ### Files to NOT touch:
 - `.llm/PERSONAS.md` — useful as-is for ongoing development
 - `.llm/PRINCIPLES.md` — useful as-is for ongoing development
 - `.llm/BOOTSTRAP.md` — this file; leave it for reference
+- `CLAUDE.md` — project instructions; leave as-is
 - Don't create game-specific folders or systems yet
 
 ---
