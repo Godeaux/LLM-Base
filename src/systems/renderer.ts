@@ -18,6 +18,16 @@ const FIREBALL_MAT = new THREE.MeshStandardMaterial({
 const ARROW_SHAFT_MAT = new THREE.MeshStandardMaterial({ color: 0x8b6914 });
 const ARROW_TIP_MAT = new THREE.MeshStandardMaterial({ color: 0xcccccc });
 const ARROW_FLETCH_MAT = new THREE.MeshStandardMaterial({ color: 0xcc2222 });
+const ARCANE_MAT = new THREE.MeshStandardMaterial({
+  color: 0x8844ff,
+  emissive: 0x6622cc,
+  emissiveIntensity: 1.2,
+});
+const ARCANE_PARTICLE_MAT = new THREE.MeshBasicMaterial({
+  color: 0xaa66ff,
+  transparent: true,
+  opacity: 0.6,
+});
 
 // Shared geometries
 const TORSO_GEO = new THREE.BoxGeometry(0.8, 1.0, 0.6);
@@ -27,6 +37,12 @@ const FIREBALL_GEO = new THREE.SphereGeometry(0.35, 6, 4);
 const ARROW_SHAFT_GEO = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 4);
 const ARROW_TIP_GEO = new THREE.ConeGeometry(0.06, 0.2, 4);
 const ARROW_FLETCH_GEO = new THREE.BoxGeometry(0.15, 0.01, 0.08);
+const ARCANE_CORE_GEO = new THREE.OctahedronGeometry(0.25, 0);
+const ARCANE_PARTICLE_GEO = new THREE.SphereGeometry(0.08, 4, 3);
+
+// Particle trail storage: projectile id -> array of trail meshes
+const arcaneTrails = new Map<number, THREE.Mesh[]>();
+const TRAIL_LENGTH = 12;
 
 export function createEnemyMesh(enemy: EnemyState, scene: THREE.Scene): THREE.Group {
   const group = new THREE.Group();
@@ -103,6 +119,34 @@ function createArrowMesh(proj: ProjectileState, scene: THREE.Scene): THREE.Group
   return group;
 }
 
+function createArcaneMesh(proj: ProjectileState, scene: THREE.Scene): THREE.Group {
+  const group = new THREE.Group();
+
+  // Core: spinning octahedron
+  const core = new THREE.Mesh(ARCANE_CORE_GEO, ARCANE_MAT);
+  core.castShadow = true;
+  core.name = "core";
+  group.add(core);
+
+  // Glow light — purple
+  const light = new THREE.PointLight(0x8844ff, 3, 10);
+  group.add(light);
+
+  // Initialize trail particles
+  const trail: THREE.Mesh[] = [];
+  for (let i = 0; i < TRAIL_LENGTH; i++) {
+    const particle = new THREE.Mesh(ARCANE_PARTICLE_GEO, ARCANE_PARTICLE_MAT.clone());
+    particle.visible = false;
+    scene.add(particle);
+    trail.push(particle);
+  }
+  arcaneTrails.set(proj.id, trail);
+
+  scene.add(group);
+  projectileMeshes.set(proj.id, group);
+  return group;
+}
+
 export function syncRenderer(state: GameState, scene: THREE.Scene): void {
   // Sync enemies
   for (const enemy of state.enemies) {
@@ -139,20 +183,55 @@ export function syncRenderer(state: GameState, scene: THREE.Scene): void {
   for (const proj of state.projectiles) {
     let obj = projectileMeshes.get(proj.id);
     if (!obj) {
-      obj = proj.type === "arrow"
-        ? createArrowMesh(proj, scene)
-        : createFireballMesh(proj, scene);
+      if (proj.type === "arcane") {
+        obj = createArcaneMesh(proj, scene);
+      } else if (proj.type === "arrow") {
+        obj = createArrowMesh(proj, scene);
+      } else {
+        obj = createFireballMesh(proj, scene);
+      }
     }
 
     const pos = proj.body.position;
     obj.position.set(pos.x, pos.y, pos.z);
 
-    if (proj.type === "arrow") {
+    if (proj.type === "arcane") {
+      // Spin the octahedron core
+      const core = obj.getObjectByName("core");
+      if (core) {
+        core.rotation.x += 0.08;
+        core.rotation.y += 0.12;
+        core.rotation.z += 0.05;
+      }
+
+      // Update particle trail: shift particles back, newest at [0]
+      const trail = arcaneTrails.get(proj.id);
+      if (trail) {
+        for (let i = trail.length - 1; i > 0; i--) {
+          const prev = trail[i - 1]!;
+          const curr = trail[i]!;
+          curr.position.copy(prev.position);
+          curr.visible = prev.visible;
+          // Fade and shrink toward the tail
+          const t = i / trail.length;
+          curr.scale.setScalar(1 - t * 0.8);
+          const mat = curr.material as THREE.MeshBasicMaterial;
+          mat.opacity = 0.6 * (1 - t);
+        }
+        // Newest particle at current position with slight random offset
+        const head = trail[0]!;
+        head.position.set(
+          pos.x + (Math.random() - 0.5) * 0.3,
+          pos.y + (Math.random() - 0.5) * 0.3,
+          pos.z + (Math.random() - 0.5) * 0.3,
+        );
+        head.visible = true;
+      }
+    } else if (proj.type === "arrow") {
       // Orient arrow along its velocity vector
       const vel = proj.body.velocity;
       if (vel.length() > 0.5) {
         const dir = new THREE.Vector3(vel.x, vel.y, vel.z).normalize();
-        // Arrow shaft is along local Y, so we need to rotate Y-up to face dir
         const up = new THREE.Vector3(0, 1, 0);
         const quat = new THREE.Quaternion().setFromUnitVectors(up, dir);
         obj.quaternion.copy(quat);
@@ -166,6 +245,12 @@ export function syncRenderer(state: GameState, scene: THREE.Scene): void {
     if (!proj.alive) {
       scene.remove(obj);
       projectileMeshes.delete(proj.id);
+      // Clean up trail particles
+      const trail = arcaneTrails.get(proj.id);
+      if (trail) {
+        for (const p of trail) scene.remove(p);
+        arcaneTrails.delete(proj.id);
+      }
     }
   }
 }

@@ -22,6 +22,13 @@ export interface TowerState {
   arrowFireTimer: number;
   arrowDamage: number;
   arrowSpeed: number;
+  // Arcane bolt attack
+  arcaneFireRate: number;
+  arcaneFireTimer: number;
+  arcaneDamage: number;
+  arcaneSpeed: number;
+  // Debug toggles
+  attackToggles: Record<ProjectileType, boolean>;
 }
 
 export interface EnemyState {
@@ -38,7 +45,7 @@ export interface EnemyState {
   type: "walker";
 }
 
-export type ProjectileType = "fireball" | "arrow";
+export type ProjectileType = "fireball" | "arrow" | "arcane";
 
 export interface ProjectileState {
   id: number;
@@ -51,6 +58,7 @@ export interface ProjectileState {
   type: ProjectileType;
   splashRadius: number; // 0 = no splash
   splashForce: number;
+  targetId: number | null; // homing target (arcane bolt)
 }
 
 export interface WaveState {
@@ -86,6 +94,12 @@ export function createInitialState(): GameState {
       arrowFireTimer: 0.3, // offset so they don't fire at same time
       arrowDamage: 1,
       arrowSpeed: 45,
+      // Arcane bolt: slow, homing, guaranteed hit
+      arcaneFireRate: 0.8,
+      arcaneFireTimer: 0.6,
+      arcaneDamage: 1.8,
+      arcaneSpeed: 12,
+      attackToggles: { fireball: true, arrow: true, arcane: true },
     },
     enemies: [],
     projectiles: [],

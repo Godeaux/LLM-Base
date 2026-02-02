@@ -8,36 +8,61 @@ export function updateTowerCombat(state: GameState, world: CANNON.World, dt: num
   const aliveEnemies = state.enemies.filter((e) => e.alive);
   if (aliveEnemies.length === 0) return;
 
+  const toggles = state.tower.attackToggles;
+
   // --- Fireball: slower, targets clusters for splash value ---
-  state.tower.fireTimer -= dt;
-  if (state.tower.fireTimer <= 0) {
-    const target = findBestFireballTarget(aliveEnemies, state.tower.position);
-    if (target) {
-      const proj = fireProjectile(
-        state, world,
-        target.body.position.clone(),
-        target.body.velocity.clone(),
-        "fireball",
-      );
-      state.projectiles.push(proj);
+  if (toggles.fireball) {
+    state.tower.fireTimer -= dt;
+    if (state.tower.fireTimer <= 0) {
+      const target = findBestFireballTarget(aliveEnemies, state.tower.position);
+      if (target) {
+        const proj = fireProjectile(
+          state, world,
+          target.body.position.clone(),
+          target.body.velocity.clone(),
+          "fireball",
+        );
+        state.projectiles.push(proj);
+      }
+      state.tower.fireTimer = 1 / state.tower.fireRate;
     }
-    state.tower.fireTimer = 1 / state.tower.fireRate;
   }
 
   // --- Arrow: faster, targets nearest enemy ---
-  state.tower.arrowFireTimer -= dt;
-  if (state.tower.arrowFireTimer <= 0) {
-    const target = findNearestEnemy(aliveEnemies, state.tower.position);
-    if (target) {
-      const proj = fireProjectile(
-        state, world,
-        target.body.position.clone(),
-        target.body.velocity.clone(),
-        "arrow",
-      );
-      state.projectiles.push(proj);
+  if (toggles.arrow) {
+    state.tower.arrowFireTimer -= dt;
+    if (state.tower.arrowFireTimer <= 0) {
+      const target = findNearestEnemy(aliveEnemies, state.tower.position);
+      if (target) {
+        const proj = fireProjectile(
+          state, world,
+          target.body.position.clone(),
+          target.body.velocity.clone(),
+          "arrow",
+        );
+        state.projectiles.push(proj);
+      }
+      state.tower.arrowFireTimer = 1 / state.tower.arrowFireRate;
     }
-    state.tower.arrowFireTimer = 1 / state.tower.arrowFireRate;
+  }
+
+  // --- Arcane bolt: homing, targets farthest enemy ---
+  if (toggles.arcane) {
+    state.tower.arcaneFireTimer -= dt;
+    if (state.tower.arcaneFireTimer <= 0) {
+      const target = findFarthestEnemy(aliveEnemies, state.tower.position);
+      if (target) {
+        const proj = fireProjectile(
+          state, world,
+          target.body.position.clone(),
+          target.body.velocity.clone(),
+          "arcane",
+          target.id,
+        );
+        state.projectiles.push(proj);
+      }
+      state.tower.arcaneFireTimer = 1 / state.tower.arcaneFireRate;
+    }
   }
 }
 
@@ -52,16 +77,14 @@ function findBestFireballTarget(
   let bestTarget: EnemyState | null = null;
 
   for (const candidate of enemies) {
-    // Count neighbors within splash radius
     let neighbors = 0;
     for (const other of enemies) {
       if (other.id === candidate.id) continue;
       const dx = candidate.body.position.x - other.body.position.x;
       const dz = candidate.body.position.z - other.body.position.z;
-      if (dx * dx + dz * dz < 25) neighbors++; // within 5 units
+      if (dx * dx + dz * dz < 25) neighbors++;
     }
 
-    // Prefer clusters, but also prefer closer enemies (slight bias)
     const dx = candidate.body.position.x - towerPos.x;
     const dz = candidate.body.position.z - towerPos.z;
     const dist = Math.sqrt(dx * dx + dz * dz);
@@ -94,4 +117,25 @@ function findNearestEnemy(
   }
 
   return nearest;
+}
+
+/** Arcane bolt targets farthest enemy — it homes in, so distance doesn't matter for accuracy. */
+function findFarthestEnemy(
+  enemies: EnemyState[],
+  towerPos: CANNON.Vec3,
+): EnemyState | null {
+  let farthest: EnemyState | null = null;
+  let farthestDistSq = -1;
+
+  for (const enemy of enemies) {
+    const dx = enemy.body.position.x - towerPos.x;
+    const dz = enemy.body.position.z - towerPos.z;
+    const distSq = dx * dx + dz * dz;
+    if (distSq > farthestDistSq) {
+      farthestDistSq = distSq;
+      farthest = enemy;
+    }
+  }
+
+  return farthest;
 }

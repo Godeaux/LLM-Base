@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createPhysicsWorld } from "./systems/physics.js";
 import { createInitialState } from "./state.js";
 import { updateEnemies } from "./entities/enemy.js";
-import { updateProjectiles, checkProjectileHits } from "./entities/projectile.js";
+import { updateProjectiles, checkProjectileHits, updateArcaneHoming } from "./entities/projectile.js";
 import { updateTowerCombat } from "./systems/combat.js";
 import { updateWaves } from "./systems/waves.js";
 import { syncRenderer, cleanupDeadEntities } from "./systems/renderer.js";
@@ -123,7 +123,7 @@ const world = createPhysicsWorld();
 const state = createInitialState();
 
 // --- HUD ---
-createHUD();
+createHUD(state);
 
 // --- Resize handler ---
 window.addEventListener("resize", () => {
@@ -154,6 +154,7 @@ function gameLoop(now: number): void {
       updateWaves(state, world, PHYSICS_DT);
       updateEnemies(state, PHYSICS_DT);
       updateTowerCombat(state, world, PHYSICS_DT);
+      updateArcaneHoming(state);
       updateProjectiles(state, PHYSICS_DT);
       checkProjectileHits(state);
 

@@ -94,9 +94,16 @@ export function fireProjectile(
   targetPos: CANNON.Vec3,
   targetVel: CANNON.Vec3,
   type: ProjectileType,
+  targetId?: number,
 ): ProjectileState {
-  const config = type === "fireball" ? FIREBALL_CONFIG : ARROW_CONFIG;
   const origin = new CANNON.Vec3(0, 6.5, 0); // top of tower
+
+  // Arcane bolt: no gravity, floaty launch toward target
+  if (type === "arcane") {
+    return fireArcaneBolt(world, origin, targetPos, targetId ?? null);
+  }
+
+  const config = type === "fireball" ? FIREBALL_CONFIG : ARROW_CONFIG;
 
   const dx = targetPos.x - origin.x;
   const dz = targetPos.z - origin.z;
@@ -146,7 +153,121 @@ export function fireProjectile(
     type: config.type,
     splashRadius: config.splashRadius,
     splashForce: config.splashForce,
+    targetId: null,
   };
+}
+
+const ARCANE_SPEED = 12;
+const ARCANE_STEER_FORCE = 280;
+
+function fireArcaneBolt(
+  world: CANNON.World,
+  origin: CANNON.Vec3,
+  targetPos: CANNON.Vec3,
+  targetId: number | null,
+): ProjectileState {
+  // Initial launch: lob upward and vaguely toward target
+  const dx = targetPos.x - origin.x;
+  const dz = targetPos.z - origin.z;
+  const dist = Math.sqrt(dx * dx + dz * dz) || 1;
+
+  const body = new CANNON.Body({
+    mass: 0.5,
+    shape: new CANNON.Sphere(0.2),
+    position: origin.clone(),
+    velocity: new CANNON.Vec3(
+      (dx / dist) * ARCANE_SPEED * 0.4,
+      ARCANE_SPEED * 0.6,
+      (dz / dist) * ARCANE_SPEED * 0.4,
+    ),
+    collisionFilterGroup: GROUP_PROJECTILE,
+    collisionFilterMask: GROUP_ENEMY,
+    linearDamping: 0.05,
+  });
+
+  world.addBody(body);
+
+  return {
+    id: nextEntityId(),
+    body,
+    alive: true,
+    damage: 1.8,
+    knockback: 6,
+    age: 0,
+    maxAge: 8,
+    type: "arcane",
+    splashRadius: 0,
+    splashForce: 0,
+    targetId,
+  };
+}
+
+/**
+ * Homing update for arcane bolts. Called each physics tick.
+ * Steers toward the target with a force, creating a floaty curved path.
+ */
+export function updateArcaneHoming(state: GameState): void {
+  for (const proj of state.projectiles) {
+    if (!proj.alive || proj.type !== "arcane") continue;
+
+    // Cancel gravity so arcane bolts float
+    proj.body.force.y += 20 * proj.body.mass;
+
+    if (proj.targetId === null) continue;
+
+    const target = state.enemies.find((e) => e.id === proj.targetId && e.alive);
+    if (!target) {
+      // Target died — find nearest alive enemy to retarget
+      let nearest: { id: number; distSq: number } | null = null;
+      for (const e of state.enemies) {
+        if (!e.alive) continue;
+        const dx = e.body.position.x - proj.body.position.x;
+        const dy = e.body.position.y - proj.body.position.y;
+        const dz = e.body.position.z - proj.body.position.z;
+        const dSq = dx * dx + dy * dy + dz * dz;
+        if (!nearest || dSq < nearest.distSq) nearest = { id: e.id, distSq: dSq };
+      }
+      if (nearest) {
+        proj.targetId = nearest.id;
+      } else {
+        proj.targetId = null;
+      }
+      continue;
+    }
+
+    // Steer toward target
+    const tPos = target.body.position;
+    const pPos = proj.body.position;
+    const dx = tPos.x - pPos.x;
+    const dy = (tPos.y + 0.5) - pPos.y;
+    const dz = tPos.z - pPos.z;
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (dist < 0.1) continue;
+
+    const dirX = dx / dist;
+    const dirY = dy / dist;
+    const dirZ = dz / dist;
+
+    // Apply steering force toward target
+    proj.body.applyForce(
+      new CANNON.Vec3(
+        dirX * ARCANE_STEER_FORCE,
+        dirY * ARCANE_STEER_FORCE,
+        dirZ * ARCANE_STEER_FORCE,
+      ),
+      proj.body.position,
+    );
+
+    // Cap speed so it stays floaty
+    const vel = proj.body.velocity;
+    const speed = vel.length();
+    if (speed > ARCANE_SPEED) {
+      const scale = ARCANE_SPEED / speed;
+      vel.x *= scale;
+      vel.y *= scale;
+      vel.z *= scale;
+    }
+  }
 }
 
 export function updateProjectiles(state: GameState, dt: number): void {
@@ -163,8 +284,8 @@ export function checkProjectileHits(state: GameState): void {
   for (const proj of state.projectiles) {
     if (!proj.alive) continue;
 
-    // Check if projectile hit the ground (for splash)
-    if (proj.body.position.y < 0.3 && proj.body.velocity.y < 0) {
+    // Check if projectile hit the ground (for splash) — arcane bolts float, skip ground check
+    if (proj.type !== "arcane" && proj.body.position.y < 0.3 && proj.body.velocity.y < 0) {
       if (proj.splashRadius > 0) {
         applySplashDamage(state, proj);
       }
