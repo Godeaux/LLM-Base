@@ -47,8 +47,33 @@ jobs:
         if: steps.check-web.outputs.is_web == 'true'
         run: npm test
 
-      - name: Skip message for Godot
+      # Godot CI steps (when package.json doesn't exist)
+      - name: Setup Python (for gdtoolkit)
+        if: steps.check-web.outputs.is_web == 'false'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install gdtoolkit
+        if: steps.check-web.outputs.is_web == 'false'
+        run: pip install gdtoolkit
+
+      - name: Lint GDScript
         if: steps.check-web.outputs.is_web == 'false'
         run: |
-          echo "This is a Godot project (no package.json found)."
-          echo "Web CI checks skipped. Consider adding Godot-specific CI if needed."
+          # Find all .gd files and lint them (skip .godot-template if it exists)
+          if find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" | grep -q .; then
+            gdlint $(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*")
+          else
+            echo "No GDScript files found to lint."
+          fi
+
+      - name: Check GDScript formatting
+        if: steps.check-web.outputs.is_web == 'false'
+        run: |
+          # Check formatting on all .gd files (skip templates and cache)
+          if find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" | grep -q .; then
+            gdformat --check $(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*")
+          else
+            echo "No GDScript files found to check."
+          fi

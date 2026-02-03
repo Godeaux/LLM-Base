@@ -17,8 +17,10 @@ This repo is designed to be **rewritten by an LLM** based on your game idea. The
 1. Clone this repo
 2. Open it in your AI coding editor (Windsurf, Cursor, VS Code + Claude, etc.)
 3. Say: *"I want to build [your game idea]. Let's get started."*
-4. Answer the questions
-5. The AI configures everything, then you run `npm install && npm run dev`
+4. Answer the questions (vision → gameplay → technical)
+5. The AI configures everything, then:
+   - **Web path (TypeScript):** `npm install && npm run dev`
+   - **Godot path (GDScript):** Open in Godot 4.3+ and press Play
 
 That's it. The AI reads `.llm/BOOTSTRAP.md` and handles the rest.
 
@@ -31,6 +33,8 @@ That's it. The AI reads `.llm/BOOTSTRAP.md` and handles the rest.
   DECISIONS.md   → Technical decisions log (filled in during bootstrap)
   PERSONAS.md    → Specialized roles the AI can adopt during development
   PRINCIPLES.md  → Development guidelines
+  PATTERNS.md    → Reference implementations (FSM, events, save/load, pooling, etc.)
+.godot-template/ → Godot starter files (used if you choose the Godot path)
 src/
   index.ts       → Empty entry point (rewritten during bootstrap)
 tests/           → Test suite directory

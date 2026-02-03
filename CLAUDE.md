@@ -12,26 +12,23 @@ This is not optional. Every coding task, design question, or implementation disc
 
 ---
 
-## If this is a fresh clone (no game code yet):
+## Bootstrap Detection
 
-1. **Read `.llm/BOOTSTRAP.md` in full** before responding to the user.
-2. **DO NOT write code, create files, or modify configs** until all discovery rounds in BOOTSTRAP.md are complete.
-3. The user will describe a game idea. Your job is to **ask questions first** — vision, gameplay, then technical — across multiple conversation turns.
-4. Only after the user confirms the tech stack do you rewrite the foundation files.
-5. **`.llm/DISCOVERY.md` must be filled in before any code is written.** A pre-commit hook enforces this for src/ changes.
+Check `.llm/DISCOVERY.md` first:
 
----
+- **If it contains unfilled placeholders** (like `_one-sentence description_` or `_plays like X meets Y_`):
+  → This is a fresh clone. **Read and follow `.llm/BOOTSTRAP.md` completely.** That file owns the entire discovery flow. Return here after bootstrap is complete.
 
-## If the bootstrap is already complete (DISCOVERY.md is filled in):
-
-1. Read `.llm/DECISIONS.md` for the tech stack and architecture context.
-2. Read `.llm/DISCOVERY.md` for the game design context.
-3. Follow the principles in `.llm/PRINCIPLES.md`.
-4. **Auto-adopt personas** based on the request (see below).
+- **If DISCOVERY.md is filled in:**
+  → Bootstrap is complete. Use these reference files during development:
+  - `.llm/DISCOVERY.md` — Game design context
+  - `.llm/DECISIONS.md` — Tech stack and architecture
+  - `.llm/PRINCIPLES.md` — Development guidelines
+  - `.llm/PATTERNS.md` — Reference implementations (FSM, events, save/load, pooling, etc.)
 
 ---
 
-## Always:
+## Always (applies before, during, and after bootstrap):
 
 - **Ask before assuming.** Ambiguity → questions, not guesses.
 - **One step at a time.** Don't combine conversation rounds or skip ahead.

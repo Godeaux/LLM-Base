@@ -1,26 +1,42 @@
 #!/bin/sh
 
-# Block commits to src/ if .llm/DISCOVERY.md hasn't been filled in.
+# Block commits to game code if .llm/DISCOVERY.md hasn't been filled in.
 # This ensures the bootstrap conversation happens before any real game code lands.
-# Non-src commits (README fixes, .gitignore updates, etc.) are allowed.
+# Non-code commits (README fixes, .gitignore updates, etc.) are allowed.
+#
+# Supports both:
+# - Web path (TypeScript): checks src/ directory
+# - Godot path (GDScript): checks *.gd files
 
 DISCOVERY=".llm/DISCOVERY.md"
 
-# Check if any staged files are in src/
-STAGED_SRC=$(git diff --cached --name-only | grep "^src/" || true)
+# Detect which path we're on
+IS_GODOT=false
+if [ -f "project.godot" ] && [ ! -f "package.json" ]; then
+  IS_GODOT=true
+fi
 
-# If no src/ files are staged, allow the commit
-if [ -z "$STAGED_SRC" ]; then
+# Check for staged game code files
+if [ "$IS_GODOT" = true ]; then
+  # Godot: check for .gd files (excluding templates)
+  STAGED_CODE=$(git diff --cached --name-only | grep "\.gd$" | grep -v "^\.godot-template/" || true)
+else
+  # Web: check for src/ files
+  STAGED_CODE=$(git diff --cached --name-only | grep "^src/" || true)
+fi
+
+# If no game code files are staged, allow the commit
+if [ -z "$STAGED_CODE" ]; then
   exit 0
 fi
 
-# src/ files are staged — enforce discovery completion
+# Game code files are staged — enforce discovery completion
 
 if [ ! -f "$DISCOVERY" ]; then
   echo ""
   echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md not found."
   echo ""
-  echo "You're trying to commit changes to src/, but the bootstrap process"
+  echo "You're trying to commit game code, but the bootstrap process"
   echo "hasn't been completed yet."
   echo ""
   echo "Run the bootstrap process first:"
@@ -29,7 +45,6 @@ if [ ! -f "$DISCOVERY" ]; then
   echo "  3. Answer the discovery questions"
   echo "  4. The AI will fill in DISCOVERY.md, then you can commit"
   echo ""
-  echo "To commit non-src files only, unstage src/ files first."
   echo "To skip this check (not recommended): git commit --no-verify"
   exit 1
 fi
@@ -39,7 +54,7 @@ if grep -q "_one-sentence description_" "$DISCOVERY" || grep -q "_plays like X m
   echo ""
   echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md is still in template form."
   echo ""
-  echo "You're trying to commit changes to src/, but the bootstrap conversation"
+  echo "You're trying to commit game code, but the bootstrap conversation"
   echo "hasn't been completed yet."
   echo ""
   echo "Before writing game code, the AI needs to ask you questions and fill in"
@@ -48,7 +63,14 @@ if grep -q "_one-sentence description_" "$DISCOVERY" || grep -q "_plays like X m
   echo "Unfilled fields detected in:"
   grep -n "^|.*|.*_.*_.*|" "$DISCOVERY" | head -10
   echo ""
-  echo "To commit non-src files only, unstage src/ files first."
   echo "To skip this check (not recommended): git commit --no-verify"
   exit 1
+fi
+
+# Optional: Run linting if available (Godot path only)
+if [ "$IS_GODOT" = true ]; then
+  if command -v gdlint > /dev/null 2>&1; then
+    echo "Running gdlint on staged GDScript files..."
+    echo "$STAGED_CODE" | xargs gdlint || exit 1
+  fi
 fi

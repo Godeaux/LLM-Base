@@ -26,7 +26,7 @@ When recommending or discussing features, communicate expected complexity so the
 ## Code Principles
 
 ### Grow structure, don't prescribe it
-- Start flat. Add folders when files naturally cluster.
+- Start flat. Add folders and reorganize when files naturally cluster.
 - No empty folders. No placeholder files.
 - Structure emerges from the game, not before it.
 - Three files in a folder is a hint. Five is a signal. Act then.
@@ -35,7 +35,7 @@ When recommending or discussing features, communicate expected complexity so the
 - One concept per file.
 - Name describes content: `PlayerMovement.ts` / `player_movement.gd` — not `utils` or `helpers`
 - ~200 line soft limit. LLMs (and humans) work better with focused files.
-- If a file does two things, it's probably two files.
+- If a file does two things, it should probably be turned into two files.
 
 ### Data over behavior
 - Prefer plain objects to classes.

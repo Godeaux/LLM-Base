@@ -140,21 +140,56 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 ### If Path B (Godot/GDScript):
 
+**Templates available:** The `.godot-template/` folder contains starter files. Copy and customize them — don't start from scratch.
+
 1. **`.llm/DISCOVERY.md`** — Fill in ALL blank fields (same as Path A — this always comes first).
 
 2. **`.llm/DECISIONS.md`** — Fill in with Godot-specific decisions (version, rendering method, physics approach, scene structure). Replace the web-centric dependencies table with Godot equivalents (addons, GDExtensions if any).
 
 3. **Archive web-specific files** — Move `package.json`, `tsconfig.json`, `eslint.config.js`, `.prettierrc`, `src/`, and `tests/` into a new folder called `.web-archive/`. Don't delete them — the user may want npm tooling later (asset pipelines, build scripts, etc.). Add `.web-archive/` to `.gitignore` if they want to exclude it from version control.
 
-4. **Create `project.godot`** — Minimal Godot project file with the game name and basic settings.
+4. **Copy and customize `project.godot`** — Start from `.godot-template/project.godot`:
+   ```ini
+   config_version=5
 
-5. **Create entry scene** — A `main.tscn` (or `.tres`) and `main.gd` that shows proof-of-life: a basic scene with a camera and something visible. Keep it minimal.
+   [application]
+   config/name="Your Game Name"        ; ← Update this
+   config/features=PackedStringArray("4.3")
+   run/main_scene="res://main.tscn"
 
-6. **Create `.gdlintrc`** — If gdlint/gdtoolkit is available, configure basic GDScript linting rules.
+   [rendering]
+   renderer/rendering_method="forward_plus"  ; ← Or "mobile" / "gl_compatibility"
+   ```
 
-7. **Update `.husky/pre-commit`** — Replace npm-based checks with Godot-appropriate checks (or remove if not applicable).
+5. **Copy and customize entry scene** — Start from `.godot-template/main.tscn` and `.godot-template/main.gd`:
 
-8. **`README.md`** — Rewrite to describe the Godot project. Replace npm scripts table with Godot workflow (how to open in editor, how to run, how to export).
+   For **2D games**, keep as-is (uses `Node2D` + `Camera2D`).
+
+   For **3D games**, change to:
+   ```gdscript
+   extends Node3D
+
+   func _ready() -> void:
+       print("Game started. Foundation is working.")
+   ```
+   And update `main.tscn` to use `Node3D` + `Camera3D`.
+
+6. **Copy `.gdlintrc`** — Copy `.godot-template/.gdlintrc` to the project root. This configures GDScript linting (enforces naming conventions, line length, etc.).
+
+7. **Update `.husky/pre-commit`** — The hook already supports Godot projects. If `gdlint` is installed locally, it will run on commit. Otherwise, CI handles linting.
+
+8. **`README.md`** — Rewrite to describe the Godot project. Replace npm scripts table with Godot workflow:
+   ```markdown
+   ## Running the Game
+   1. Open this folder in Godot 4.3+
+   2. Press F5 (or Play button) to run
+
+   ## Linting
+   Install gdtoolkit: `pip install gdtoolkit`
+   Run: `gdlint .`
+   ```
+
+9. **Delete or keep `.godot-template/`** — After copying, you can delete the template folder or keep it for reference. It won't interfere with Godot.
 
 ### Files to NOT touch (either path):
 - `.llm/PERSONAS.md` — useful as-is for ongoing development
