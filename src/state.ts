@@ -6,6 +6,7 @@ export interface GameState {
   enemies: EnemyState[];
   projectiles: ProjectileState[];
   lightningArcs: LightningArc[];
+  minions: MinionState[];
   wave: WaveState;
   time: number;
   deltaTime: number;
@@ -44,7 +45,19 @@ export interface EnemyState {
 }
 
 export type ProjectileType = "fireball" | "arrow" | "arcane";
-export type AttackType = ProjectileType | "lightning";
+export type AttackType = ProjectileType | "lightning" | "minions";
+
+export type MinionAIState = "roaming" | "windup" | "bonk" | "cooldown" | "recovery";
+
+export interface MinionState {
+  id: number;
+  body: CANNON.Body;
+  aiState: MinionAIState;
+  stateTimer: number;       // countdown for current AI state
+  targetId: number | null;  // enemy being attacked
+  legPhase: number;         // walk animation
+  meshGroup: null;          // set by renderer
+}
 
 /** Visual-only lightning arc that fades out over time. */
 export interface LightningArc {
@@ -96,11 +109,13 @@ export function createInitialState(): GameState {
         arrow:     { fireRate: ARROW.fireRate,     fireTimer: 0.3, enabled: true },
         arcane:    { fireRate: ARCANE.fireRate,     fireTimer: 0.6, enabled: true },
         lightning: { fireRate: LIGHTNING.fireRate,  fireTimer: 0.9, enabled: true },
+        minions:   { fireRate: 0,                   fireTimer: 0,   enabled: true },
       },
     },
     enemies: [],
     projectiles: [],
     lightningArcs: [],
+    minions: [],
     wave: {
       number: 1,
       enemiesRemaining: 0,

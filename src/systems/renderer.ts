@@ -6,12 +6,14 @@ import {
   createFireballMesh,
   createArrowMesh,
   createArcaneMesh,
+  createMinionMesh,
 } from "./meshes.js";
 
 // Track Three.js objects by entity ID
 const enemyMeshes = new Map<number, THREE.Group>();
 const projectileMeshes = new Map<number, THREE.Object3D>();
 const arcaneTrails = new Map<number, THREE.Mesh[]>();
+const minionMeshes = new Map<number, THREE.Group>();
 const lightningLines: THREE.Line[] = [];
 
 const LIGHTNING_MAT = new THREE.LineBasicMaterial({ color: 0x88ccff, linewidth: 2 });
@@ -24,6 +26,7 @@ const _arrowQuat = new THREE.Quaternion();
 export function syncRenderer(state: GameState, scene: THREE.Scene): void {
   syncEnemies(state, scene);
   syncProjectiles(state, scene);
+  syncMinions(state, scene);
   syncLightning(state, scene);
 }
 
@@ -129,6 +132,61 @@ function syncArrowVisuals(obj: THREE.Object3D, velocity: CANNON.Vec3): void {
     _arrowDir.set(velocity.x, velocity.y, velocity.z).normalize();
     _arrowQuat.setFromUnitVectors(_arrowUp, _arrowDir);
     obj.quaternion.copy(_arrowQuat);
+  }
+}
+
+function syncMinions(state: GameState, scene: THREE.Scene): void {
+  // Track which minion IDs are still present
+  const activeIds = new Set(state.minions.map((m) => m.id));
+
+  // Remove meshes for despawned minions
+  for (const [id, group] of minionMeshes) {
+    if (!activeIds.has(id)) {
+      scene.remove(group);
+      minionMeshes.delete(id);
+    }
+  }
+
+  for (const minion of state.minions) {
+    let group = minionMeshes.get(minion.id);
+    if (!group) {
+      group = createMinionMesh(minion, scene, minionMeshes);
+    }
+
+    const pos = minion.body.position;
+    const quat = minion.body.quaternion;
+    group.position.set(pos.x, pos.y - 0.35, pos.z);
+    group.quaternion.set(quat.x, quat.y, quat.z, quat.w);
+
+    // Leg animation when roaming
+    if (minion.aiState === "roaming") {
+      const leftLeg = group.getObjectByName("leftLeg") as THREE.Mesh | undefined;
+      const rightLeg = group.getObjectByName("rightLeg") as THREE.Mesh | undefined;
+      const swing = Math.sin(minion.legPhase) * 0.5;
+      if (leftLeg) leftLeg.rotation.x = swing;
+      if (rightLeg) rightLeg.rotation.x = -swing;
+    }
+
+    // Windup: raise arms
+    const leftArm = group.getObjectByName("leftArm") as THREE.Mesh | undefined;
+    const rightArm = group.getObjectByName("rightArm") as THREE.Mesh | undefined;
+    if (minion.aiState === "windup") {
+      if (leftArm) leftArm.rotation.x = -1.8;
+      if (rightArm) rightArm.rotation.x = -1.8;
+    } else if (minion.aiState === "bonk") {
+      if (leftArm) leftArm.rotation.x = 0.8;
+      if (rightArm) rightArm.rotation.x = 0.8;
+    } else {
+      if (leftArm) leftArm.rotation.x = 0;
+      if (rightArm) rightArm.rotation.x = 0;
+    }
+
+    // Recovery: tilt sideways (tumbled)
+    if (minion.aiState === "recovery") {
+      group.rotation.z = Math.PI / 3;
+    } else {
+      group.rotation.z = 0;
+    }
   }
 }
 

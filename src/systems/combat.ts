@@ -2,6 +2,8 @@ import * as CANNON from "cannon-es";
 import { EnemyState, GameState, ProjectileType } from "../state.js";
 import { fireProjectile } from "../entities/projectile.js";
 import { fireLightning } from "./lightning.js";
+import { spawnMinion, despawnMinion } from "../entities/minion.js";
+import { MINION } from "../config.js";
 
 /** Targeting strategy per projectile attack type. */
 const TARGET_STRATEGY: Record<
@@ -51,6 +53,21 @@ export function updateTowerCombat(state: GameState, world: CANNON.World, dt: num
       fireLightning(state);
       lightning.fireTimer = 1 / lightning.fireRate;
     }
+  }
+
+  // --- Minions: spawn/despawn based on toggle ---
+  const minionsAtk = attacks.minions;
+  if (minionsAtk.enabled) {
+    // Spawn up to desired count
+    while (state.minions.length < MINION.count) {
+      state.minions.push(spawnMinion(world));
+    }
+  } else {
+    // Despawn all immediately
+    for (const minion of state.minions) {
+      despawnMinion(minion, world);
+    }
+    state.minions.length = 0;
   }
 }
 

@@ -104,3 +104,19 @@ export const DEATH = {
   launchSideMult: 2,     // sideways impulse = knockDir * this
   ragdollSpin: 20,       // max angular velocity on death
 };
+
+// ----- MINIONS -----
+export const MINION = {
+  count: 1,              // starting minion count (upgrades up to ~6)
+  damage: 1.5,           // damage per bonk
+  attackRange: 1.8,      // distance to start windup
+  windupTime: 0.4,       // seconds before bonk lands
+  cooldownTime: 0.6,     // seconds after bonk before next attack
+  speed: 5,              // run speed
+  mass: 1.5,             // light — gets flung by explosions
+  forceMult: 4,          // movement force multiplier
+  recoveryTime: 1.2,     // seconds lying on ground after being flung
+  flingThreshold: 8,     // velocity magnitude that triggers recovery state
+  pushForce: 3,          // small impulse applied to enemy on bonk
+  spawnRadius: 4,        // distance from tower where minions spawn
+};

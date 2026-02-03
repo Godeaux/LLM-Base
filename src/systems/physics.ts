@@ -6,6 +6,7 @@ export const GROUP_GROUND = 1;
 export const GROUP_TOWER = 2;
 export const GROUP_ENEMY = 4;
 export const GROUP_PROJECTILE = 8;
+export const GROUP_MINION = 16;
 
 export function createPhysicsWorld(): CANNON.World {
   const world = new CANNON.World();
@@ -18,7 +19,7 @@ export function createPhysicsWorld(): CANNON.World {
     mass: 0,
     shape: new CANNON.Plane(),
     collisionFilterGroup: GROUP_GROUND,
-    collisionFilterMask: GROUP_ENEMY | GROUP_PROJECTILE,
+    collisionFilterMask: GROUP_ENEMY | GROUP_PROJECTILE | GROUP_MINION,
   });
   groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
   world.addBody(groundBody);

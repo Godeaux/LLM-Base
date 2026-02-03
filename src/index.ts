@@ -7,6 +7,7 @@ import { updateProjectiles, updateArcaneHoming } from "./entities/projectile.js"
 import { checkProjectileHits } from "./systems/damage.js";
 import { updateTowerCombat } from "./systems/combat.js";
 import { updateLightningArcs } from "./systems/lightning.js";
+import { updateMinions } from "./entities/minion.js";
 import { updateWaves } from "./systems/waves.js";
 import { syncRenderer, cleanupDeadEntities } from "./systems/renderer.js";
 import { createHUD, updateHUD } from "./systems/hud.js";
@@ -86,6 +87,7 @@ function gameLoop(now: number): void {
       updateArcaneHoming(state);
       updateProjectiles(state, PHYSICS_DT);
       checkProjectileHits(state);
+      updateMinions(state, PHYSICS_DT);
       updateLightningArcs(state, PHYSICS_DT);
 
       // Physics step

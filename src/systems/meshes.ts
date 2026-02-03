@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EnemyState, ProjectileState } from "../state.js";
+import { EnemyState, MinionState, ProjectileState } from "../state.js";
 
 // --- Shared materials ---
 const BODY_MAT = new THREE.MeshStandardMaterial({ color: 0xcc3333 });
@@ -34,6 +34,15 @@ const ARROW_TIP_GEO = new THREE.ConeGeometry(0.06, 0.2, 4);
 const ARROW_FLETCH_GEO = new THREE.BoxGeometry(0.15, 0.01, 0.08);
 const ARCANE_CORE_GEO = new THREE.OctahedronGeometry(0.25, 0);
 const ARCANE_PARTICLE_GEO = new THREE.SphereGeometry(0.08, 4, 3);
+
+// --- Minion shared ---
+const MINION_BODY_MAT = new THREE.MeshStandardMaterial({ color: 0x33aa66 });
+const MINION_LIMB_MAT = new THREE.MeshStandardMaterial({ color: 0x228855 });
+const MINION_HEAD_MAT = new THREE.MeshStandardMaterial({ color: 0x44cc77 });
+const MINION_TORSO_GEO = new THREE.BoxGeometry(0.45, 0.5, 0.35);
+const MINION_LEG_GEO = new THREE.BoxGeometry(0.14, 0.35, 0.14);
+const MINION_ARM_GEO = new THREE.BoxGeometry(0.12, 0.35, 0.12);
+const MINION_HEAD_GEO = new THREE.SphereGeometry(0.2, 6, 4);
 
 export const TRAIL_LENGTH = 12;
 
@@ -139,5 +148,51 @@ export function createArcaneMesh(
 
   scene.add(group);
   registry.set(proj.id, group);
+  return group;
+}
+
+export function createMinionMesh(
+  minion: MinionState,
+  scene: THREE.Scene,
+  registry: Map<number, THREE.Group>,
+): THREE.Group {
+  const group = new THREE.Group();
+
+  const torso = new THREE.Mesh(MINION_TORSO_GEO, MINION_BODY_MAT);
+  torso.castShadow = true;
+  torso.position.y = 0.25;
+  group.add(torso);
+
+  const head = new THREE.Mesh(MINION_HEAD_GEO, MINION_HEAD_MAT);
+  head.castShadow = true;
+  head.position.y = 0.7;
+  group.add(head);
+
+  const leftLeg = new THREE.Mesh(MINION_LEG_GEO, MINION_LIMB_MAT);
+  leftLeg.castShadow = true;
+  leftLeg.position.set(-0.12, -0.15, 0);
+  leftLeg.name = "leftLeg";
+  group.add(leftLeg);
+
+  const rightLeg = new THREE.Mesh(MINION_LEG_GEO, MINION_LIMB_MAT);
+  rightLeg.castShadow = true;
+  rightLeg.position.set(0.12, -0.15, 0);
+  rightLeg.name = "rightLeg";
+  group.add(rightLeg);
+
+  const leftArm = new THREE.Mesh(MINION_ARM_GEO, MINION_LIMB_MAT);
+  leftArm.castShadow = true;
+  leftArm.position.set(-0.32, 0.25, 0);
+  leftArm.name = "leftArm";
+  group.add(leftArm);
+
+  const rightArm = new THREE.Mesh(MINION_ARM_GEO, MINION_LIMB_MAT);
+  rightArm.castShadow = true;
+  rightArm.position.set(0.32, 0.25, 0);
+  rightArm.name = "rightArm";
+  group.add(rightArm);
+
+  scene.add(group);
+  registry.set(minion.id, group);
   return group;
 }

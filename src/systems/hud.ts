@@ -11,6 +11,7 @@ const ATTACK_LABELS: Record<AttackType, { label: string; color: string }> = {
   arrow: { label: "Arrow", color: "#c8a82e" },
   arcane: { label: "Arcane Bolt", color: "#8844ff" },
   lightning: { label: "Lightning", color: "#88ccff" },
+  minions: { label: "Minions", color: "#33aa66" },
 };
 
 export function createHUD(state: GameState): void {
