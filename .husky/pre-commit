@@ -1,13 +1,27 @@
 #!/bin/sh
 
-# Block commits if .llm/DISCOVERY.md hasn't been filled in.
-# This ensures the bootstrap conversation happens before any real code lands.
+# Block commits to src/ if .llm/DISCOVERY.md hasn't been filled in.
+# This ensures the bootstrap conversation happens before any real game code lands.
+# Non-src commits (README fixes, .gitignore updates, etc.) are allowed.
 
 DISCOVERY=".llm/DISCOVERY.md"
+
+# Check if any staged files are in src/
+STAGED_SRC=$(git diff --cached --name-only | grep "^src/" || true)
+
+# If no src/ files are staged, allow the commit
+if [ -z "$STAGED_SRC" ]; then
+  exit 0
+fi
+
+# src/ files are staged — enforce discovery completion
 
 if [ ! -f "$DISCOVERY" ]; then
   echo ""
   echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md not found."
+  echo ""
+  echo "You're trying to commit changes to src/, but the bootstrap process"
+  echo "hasn't been completed yet."
   echo ""
   echo "Run the bootstrap process first:"
   echo "  1. Open your AI coding editor"
@@ -15,6 +29,8 @@ if [ ! -f "$DISCOVERY" ]; then
   echo "  3. Answer the discovery questions"
   echo "  4. The AI will fill in DISCOVERY.md, then you can commit"
   echo ""
+  echo "To commit non-src files only, unstage src/ files first."
+  echo "To skip this check (not recommended): git commit --no-verify"
   exit 1
 fi
 
@@ -23,13 +39,16 @@ if grep -q "_one-sentence description_" "$DISCOVERY" || grep -q "_plays like X m
   echo ""
   echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md is still in template form."
   echo ""
-  echo "The bootstrap conversation hasn't been completed yet."
-  echo "Before writing code, the AI needs to ask you questions and fill in"
+  echo "You're trying to commit changes to src/, but the bootstrap conversation"
+  echo "hasn't been completed yet."
+  echo ""
+  echo "Before writing game code, the AI needs to ask you questions and fill in"
   echo "the discovery document. Start by describing your game idea."
   echo ""
   echo "Unfilled fields detected in:"
   grep -n "^|.*|.*_.*_.*|" "$DISCOVERY" | head -10
   echo ""
+  echo "To commit non-src files only, unstage src/ files first."
   echo "To skip this check (not recommended): git commit --no-verify"
   exit 1
 fi

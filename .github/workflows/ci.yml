@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    # Only run if this is the web/TypeScript path (package.json exists)
+    # Godot projects will skip this workflow
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if web project
+        id: check-web
+        run: |
+          if [ -f "package.json" ]; then
+            echo "is_web=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_web=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: steps.check-web.outputs.is_web == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: steps.check-web.outputs.is_web == 'true'
+        run: npm ci
+
+      - name: Lint
+        if: steps.check-web.outputs.is_web == 'true'
+        run: npm run lint
+
+      - name: Type check
+        if: steps.check-web.outputs.is_web == 'true'
+        run: npm run build
+
+      - name: Test
+        if: steps.check-web.outputs.is_web == 'true'
+        run: npm test
+
+      - name: Skip message for Godot
+        if: steps.check-web.outputs.is_web == 'false'
+        run: |
+          echo "This is a Godot project (no package.json found)."
+          echo "Web CI checks skipped. Consider adding Godot-specific CI if needed."

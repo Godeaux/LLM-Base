@@ -39,20 +39,22 @@ tests/           → Test suite directory
 ### Before bootstrap: a template
 ### After bootstrap: your game's foundation
 
-## Personas
+## Auto-Persona System
 
-Once the foundation is configured, invoke specialized expertise during development:
+The AI automatically adopts specialized expertise based on your request — no explicit invocation needed. It assesses each question and applies the relevant lens:
 
-| Persona | Focus |
-|---------|-------|
-| `@architect` | Structure, performance, technical decisions |
-| `@gameplay` | Core loop, fun, balance, progression |
-| `@ui` | Interface, input, feedback, accessibility |
-| `@systems` | Individual game systems, data design |
-| `@network` | Multiplayer, synchronization, infrastructure |
-| `@quality` | Testing, debugging, stability |
+| Domain | Focus |
+|--------|-------|
+| **@architect** | Structure, performance, technical decisions |
+| **@gameplay** | Core loop, fun, balance, progression |
+| **@ui** | Interface, input, feedback, accessibility |
+| **@systems** | Individual game systems, data design |
+| **@network** | Multiplayer, synchronization, infrastructure |
+| **@quality** | Testing, debugging, stability |
 
-**Example:** *"@gameplay The combat feels flat. How do we add more impact?"*
+**Example:** *"The combat feels flat"* — AI automatically applies @gameplay lens (balance, pacing, "juice").
+
+You can still force a specific persona with `@persona` if needed, but the AI will typically figure it out.
 
 ## Scripts
 

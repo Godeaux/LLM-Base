@@ -18,13 +18,16 @@ When a user describes their game idea — no matter how detailed — you MUST co
 
 Assume these unless the user explicitly says otherwise. Do NOT ask about them:
 
-- **Scope**: Intended to eventually ship as a real product
-- **Timeline**: Months — treat this as a genuine, long-term project
-- **Team**: Solo developer who is the project manager. YOU (the AI) do 100% of the coding. The user directs, reviews, and decides.
+- **Scope**: Intended to eventually ship as a playable product (even if small)
+- **Workflow**: YOU (the AI) do 100% of the coding. Human(s) direct, review, and decide. This is always true regardless of team size.
 - **Platform**: Runs on localhost during development. Packageable for distribution later (browser, desktop, etc.) — don't lock in a distribution target now.
 - **Audience**: Intended for real players, not just a portfolio piece
 
-These are not questions. These are facts about the context. Move on.
+These are not questions. These are facts about the context.
+
+**Two things to ask early** (can be part of Step 2):
+- **Timeline?** (Quick sprint: hours-to-days / Medium: weeks / Long-term: months+) — Affects scope expectations and how much infrastructure to set up. A 4-hour jam needs minimal scaffolding. A months-long project benefits from more structure.
+- **Team size?** (Solo / 2-3 devs / 4+ devs) — Affects communication overhead, file organization, and how much structure to bake in early. Solo = minimal process. 2-3 = light conventions. 4+ = more explicit boundaries.
 
 ---
 
@@ -141,7 +144,7 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 2. **`.llm/DECISIONS.md`** — Fill in with Godot-specific decisions (version, rendering method, physics approach, scene structure). Replace the web-centric dependencies table with Godot equivalents (addons, GDExtensions if any).
 
-3. **Remove web-specific files** — Delete `package.json`, `tsconfig.json`, `eslint.config.js`, `.prettierrc`, `src/index.ts`, and `tests/.gitkeep`. These don't apply to a Godot project.
+3. **Archive web-specific files** — Move `package.json`, `tsconfig.json`, `eslint.config.js`, `.prettierrc`, `src/`, and `tests/` into a new folder called `.web-archive/`. Don't delete them — the user may want npm tooling later (asset pipelines, build scripts, etc.). Add `.web-archive/` to `.gitignore` if they want to exclude it from version control.
 
 4. **Create `project.godot`** — Minimal Godot project file with the game name and basic settings.
 

@@ -4,6 +4,25 @@ Guidelines that inform decisions as the project grows. Not rigid rules—princip
 
 ---
 
+## Implementation Difficulty Reference
+
+When recommending or discussing features, communicate expected complexity so the dev can plan accordingly.
+
+| Difficulty | What it means | Examples |
+|------------|---------------|----------|
+| **Trivial** | Minutes. Single file, obvious implementation. | Config tweaks, simple UI text, color changes |
+| **Easy** | Hours. Well-understood patterns, minimal dependencies. | Basic movement, simple collision, static UI screens |
+| **Moderate** | Day(s). Multiple files, some coordination, testable edge cases. | Inventory system, basic enemy AI, save/load, audio manager |
+| **Complex** | Days to a week. Architectural decisions, state management, potential iteration. | Procedural generation, multiplayer sync, animation state machines, physics-heavy mechanics |
+| **Hard** | Week(s). Novel problems, significant research, multiple subsystem integration. | Custom shaders, networked real-time combat, complex AI behaviors, optimization passes |
+
+**How to use this:**
+- When presenting implementation options, note difficulty: *"Adding pathfinding is moderate complexity — expect a day or two."*
+- When a feature seems simple but isn't, flag it: *"Sounds easy, but multiplayer turns this into complex territory."*
+- Helps devs prioritize and set realistic expectations.
+
+---
+
 ## Code Principles
 
 ### Grow structure, don't prescribe it
@@ -92,3 +111,40 @@ Guidelines that inform decisions as the project grows. Not rigid rules—princip
 - **TypeScript**: ESLint enforces code quality. Prettier enforces style. Run `npm run lint` and `npm run format:check` before committing.
 - **Godot**: Use gdtoolkit (`gdlint`, `gdformat`) if available. Enable static typing warnings in project settings.
 - Consistent formatting removes style debates from code review.
+
+---
+
+## Asset Principles
+
+Assets (art, audio, models, etc.) often come later in development. These guidelines keep things flexible.
+
+### Structure emerges from assets, not before
+- Don't pre-create empty asset folders. Add them when you have assets.
+- When assets arrive, organize by type first, then by context if needed:
+  ```
+  assets/
+    sprites/       # 2D images, spritesheets, UI elements
+    models/        # 3D models (.gltf, .glb, .obj, .fbx)
+    audio/
+      sfx/         # Sound effects
+      music/       # Background music, ambient
+    fonts/
+    shaders/       # Custom shaders if any
+  ```
+- This structure works for 2D, 3D, or hybrid. Delete what you don't use.
+
+### Placeholder-first development
+- Use primitives (colored boxes, circles, procedural shapes) until real assets exist.
+- Code should never assume specific asset dimensions or formats.
+- Design systems to swap assets easily (data-driven references, not hardcoded paths).
+
+### Asset formats
+- **2D/Web**: PNG for sprites (transparency), WebP for compressed, SVG for scalable UI.
+- **3D/Web**: glTF/GLB preferred (widely supported, compact).
+- **Godot**: Native formats (.tres, .tscn) or import what the engine handles.
+- **Audio**: MP3/OGG for music (compressed), WAV for short SFX (low latency).
+
+### Keep assets out of version control (when large)
+- Small assets (a few MB total) can stay in git.
+- Large assets (hundreds of MB+) should use Git LFS or live outside the repo.
+- Add large binary patterns to `.gitignore` if not using LFS.

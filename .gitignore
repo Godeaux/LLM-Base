@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE folders (keep user-specific, ignore project-level)
+.idea/
+*.swp
+*.swo
+*~
+
+# Archived web files (if using Godot path)
+# Uncomment if you want to exclude from version control:
+# .web-archive/
+
+# Godot (if using Path B)
+.godot/
+export/
+*.import
+*.translation
+
+# Godot editor settings (user-specific)
+.godot/editor/
+.godot/imported/
+
+# Export templates and builds
+*.exe
+*.x86_64
+*.pck
+*.apk
+*.aab
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
