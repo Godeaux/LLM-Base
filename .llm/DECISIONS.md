@@ -4,25 +4,27 @@
 
 ---
 
+## Engine Path
+
+_Web (TypeScript) or Godot (GDScript)? Decided during bootstrap Step 4._
+
+**Engine**: _TBD_
+
 ## Tech Stack
 
 | Category | Choice | Why |
 |----------|--------|-----|
-| **Renderer** | _TBD_ | _reasoning_ |
+| **Renderer / Engine** | _TBD_ | _reasoning_ |
 | **State management** | _TBD_ | _reasoning_ |
 | **Physics** | _TBD_ | _reasoning_ |
 | **Audio** | _TBD_ | _reasoning_ |
-| **Build tool** | _TBD_ | _reasoning_ |
+| **Build / Export** | _TBD_ | _reasoning_ |
 | **Networking** | _TBD_ | _reasoning_ |
 
-## Dependencies
+## Dependencies / Addons
 
-| Package | Purpose | Alternatives Considered |
-|---------|---------|------------------------|
-| typescript | Type safety | — |
-| eslint | Code quality | — |
-| prettier | Formatting | — |
-| vitest | Testing | Jest (heavier, slower for ESM) |
+| Package / Addon | Purpose | Alternatives Considered |
+|-----------------|---------|------------------------|
 | _TBD_ | _TBD_ | _TBD_ |
 
 ## Architecture Notes

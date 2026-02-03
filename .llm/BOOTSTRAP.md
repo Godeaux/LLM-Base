@@ -77,7 +77,10 @@ Skip anything the user already covered. Only ask what's genuinely unclear:
 
 Now YOU present a recommended tech stack. Don't ask the user to choose from a menu — make a specific recommendation and explain why. The user can push back.
 
-Cover these:
+**First, determine the engine path.** Based on the game's needs, recommend one of:
+
+### Path A: Web-based (TypeScript + libraries)
+Best for: browser-first games, rapid prototyping, web distribution, simpler 2D games, or 3D games where Three.js/Babylon.js suffice.
 
 | Decision | Your recommendation | Why |
 |----------|-------------------|-----|
@@ -88,6 +91,21 @@ Cover these:
 | **Build tool** | Vite (default) / other | Almost always Vite |
 | **Networking** | None / Socket.io / Colyseus / WebRTC | Only if multiplayer |
 | **Other deps** | Only what's needed | Justify each one |
+
+### Path B: Godot (GDScript)
+Best for: games needing a full engine (built-in physics, scene tree, animation, particles, lighting), desktop-first distribution, complex 3D, or when the user mentions Godot.
+
+| Decision | Your recommendation | Why |
+|----------|-------------------|-----|
+| **Godot version** | 4.x (stable) | GDScript 2.0, improved 3D, typed syntax |
+| **Rendering** | Forward+ / Mobile / Compatibility | Based on visual complexity and target platform |
+| **Physics** | Built-in Godot physics / Jolt override | Based on simulation needs |
+| **State management** | Autoloads / signals / Resources | Based on complexity |
+| **Scene structure** | Recommended scene tree layout | Based on game architecture |
+| **Networking** | None / built-in MultiplayerAPI / ENet | Only if multiplayer |
+| **GDExtension** | Only if needed | For performance-critical native code |
+
+**If recommending Godot, explain why it fits better than the web path (or vice versa).** Don't recommend Godot just because the game is 3D — Three.js handles plenty of 3D games. Recommend Godot when the user needs: built-in editor tooling, complex scene trees, built-in physics with editor integration, particle/shader editors, animation state machines, or plans to ship to desktop/console.
 
 End with: *"Does this stack sound right to you, or do you have preferences I should know about?"*
 
@@ -101,7 +119,7 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 **⚠️ You MUST fill in `.llm/DISCOVERY.md` FIRST.** The pre-commit hook will block commits if it still contains template placeholders. `src/index.ts` also contains a blocker comment — only replace it after DISCOVERY.md is complete.
 
-### Order of operations:
+### If Path A (Web/TypeScript):
 
 1. **`.llm/DISCOVERY.md`** — Fill in ALL blank fields with the user's actual answers. This unlocks everything else (the pre-commit hook checks for template placeholders like `_one-sentence description_`).
 
@@ -117,7 +135,25 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 7. **`README.md`** — Rewrite to describe THIS game, not the template. Keep the scripts table, update everything else.
 
-### Files to NOT touch:
+### If Path B (Godot/GDScript):
+
+1. **`.llm/DISCOVERY.md`** — Fill in ALL blank fields (same as Path A — this always comes first).
+
+2. **`.llm/DECISIONS.md`** — Fill in with Godot-specific decisions (version, rendering method, physics approach, scene structure). Replace the web-centric dependencies table with Godot equivalents (addons, GDExtensions if any).
+
+3. **Remove web-specific files** — Delete `package.json`, `tsconfig.json`, `eslint.config.js`, `.prettierrc`, `src/index.ts`, and `tests/.gitkeep`. These don't apply to a Godot project.
+
+4. **Create `project.godot`** — Minimal Godot project file with the game name and basic settings.
+
+5. **Create entry scene** — A `main.tscn` (or `.tres`) and `main.gd` that shows proof-of-life: a basic scene with a camera and something visible. Keep it minimal.
+
+6. **Create `.gdlintrc`** — If gdlint/gdtoolkit is available, configure basic GDScript linting rules.
+
+7. **Update `.husky/pre-commit`** — Replace npm-based checks with Godot-appropriate checks (or remove if not applicable).
+
+8. **`README.md`** — Rewrite to describe the Godot project. Replace npm scripts table with Godot workflow (how to open in editor, how to run, how to export).
+
+### Files to NOT touch (either path):
 - `.llm/PERSONAS.md` — useful as-is for ongoing development
 - `.llm/PRINCIPLES.md` — useful as-is for ongoing development
 - `.llm/BOOTSTRAP.md` — this file; leave it for reference
@@ -130,10 +166,15 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 After rewriting:
 
+### Path A (Web/TypeScript):
 1. Run `npm install`
 2. Run `npm run build` — must pass
 3. Run `npm run lint` — must pass
 4. Tell the user: *"The foundation is configured. Run `npm run dev` to see it working. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
+
+### Path B (Godot/GDScript):
+1. Confirm `project.godot` is valid and the entry scene exists
+2. Tell the user: *"The foundation is configured. Open this folder in Godot 4.x and hit Play to see the base scene. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
 
 Then transition to normal development using the personas in `PERSONAS.md`.
 
