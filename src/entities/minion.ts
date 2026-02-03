@@ -4,6 +4,10 @@ import { GROUP_MINION, GROUP_GROUND, GROUP_PROJECTILE } from "../systems/physics
 import { MINION } from "../config.js";
 import { killEnemy } from "../systems/damage.js";
 
+// Reusable temp vectors to avoid per-frame allocations
+const _moveForce = new CANNON.Vec3();
+const _pushDir = new CANNON.Vec3();
+
 export function spawnMinion(world: CANNON.World): MinionState {
   const angle = Math.random() * Math.PI * 2;
   const x = Math.cos(angle) * MINION.spawnRadius;
@@ -61,7 +65,7 @@ export function updateMinions(state: GameState, dt: number): void {
         updateWindup(minion, state, dt);
         break;
       case "bonk":
-        updateBonk(minion, state, dt);
+        updateBonk(minion, state);
         break;
       case "cooldown":
         updateCooldown(minion, dt);
@@ -100,10 +104,8 @@ function moveToward(minion: MinionState, tx: number, tz: number, dt: number): vo
   const dirX = dx / dist;
   const dirZ = dz / dist;
   const forceMag = MINION.speed * minion.body.mass * MINION.forceMult;
-  minion.body.applyForce(
-    new CANNON.Vec3(dirX * forceMag, 0, dirZ * forceMag),
-    minion.body.position,
-  );
+  _moveForce.set(dirX * forceMag, 0, dirZ * forceMag);
+  minion.body.applyForce(_moveForce, minion.body.position);
 
   // Cap horizontal speed
   const vx = minion.body.velocity.x;
@@ -161,13 +163,10 @@ function updateWindup(minion: MinionState, state: GameState, dt: number): void {
 
   if (minion.stateTimer <= 0) {
     minion.aiState = "bonk";
-    minion.stateTimer = 0.1; // brief bonk frame
   }
 }
 
-function updateBonk(minion: MinionState, state: GameState, dt: number): void {
-  minion.stateTimer -= dt;
-
+function updateBonk(minion: MinionState, state: GameState): void {
   const target = state.enemies.find((e) => e.id === minion.targetId && e.alive);
   if (target) {
     // Deal damage
@@ -177,17 +176,17 @@ function updateBonk(minion: MinionState, state: GameState, dt: number): void {
     const dx = target.body.position.x - minion.body.position.x;
     const dz = target.body.position.z - minion.body.position.z;
     const dist = Math.sqrt(dx * dx + dz * dz) || 0.1;
-    const pushDir = new CANNON.Vec3(dx / dist, 0.2, dz / dist);
-    pushDir.normalize();
-    pushDir.scale(MINION.pushForce, pushDir);
-    target.body.applyImpulse(pushDir, target.body.position);
+    _pushDir.set(dx / dist, 0.2, dz / dist);
+    _pushDir.normalize();
+    _pushDir.scale(MINION.pushForce, _pushDir);
+    target.body.applyImpulse(_pushDir, target.body.position);
 
     if (target.hp <= 0 && target.alive) {
-      killEnemy(state, target, pushDir);
+      killEnemy(state, target, _pushDir);
     }
   }
 
-  // Transition to cooldown
+  // Transition to cooldown immediately — bonk is instantaneous
   minion.aiState = "cooldown";
   minion.stateTimer = MINION.cooldownTime;
   minion.targetId = null;

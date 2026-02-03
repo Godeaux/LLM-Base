@@ -4,9 +4,10 @@
  */
 import { describe, it, expect } from "vitest";
 import * as CANNON from "cannon-es";
-import { WAVE, LIGHTNING, FIREBALL, ENEMY } from "../src/config.js";
-import { createInitialState, GameState, EnemyState } from "../src/state.js";
+import { WAVE, LIGHTNING, FIREBALL, ENEMY, MINION } from "../src/config.js";
+import { createInitialState, GameState, EnemyState, MinionState } from "../src/state.js";
 import { killEnemy } from "../src/systems/damage.js";
+import { updateMinions } from "../src/entities/minion.js";
 
 // ---------------------------------------------------------------------------
 // Helpers: create lightweight enemy stubs with real cannon-es bodies
@@ -203,7 +204,135 @@ describe("lightning chain logic", () => {
 });
 
 // ---------------------------------------------------------------------------
-// 4. Config sanity — catch accidental bad values
+// 4. Minion AI state machine
+// ---------------------------------------------------------------------------
+let minionStubId = 5000;
+function makeMinion(
+  x: number,
+  z: number,
+  opts?: Partial<Pick<MinionState, "aiState" | "stateTimer" | "targetId">>,
+): MinionState {
+  const body = new CANNON.Body({ mass: MINION.mass, position: new CANNON.Vec3(x, 0.5, z) });
+  return {
+    id: minionStubId++,
+    body,
+    aiState: opts?.aiState ?? "roaming",
+    stateTimer: opts?.stateTimer ?? 0,
+    targetId: opts?.targetId ?? null,
+    legPhase: 0,
+    meshGroup: null,
+  };
+}
+
+describe("minion AI", () => {
+  it("transitions from roaming to windup when near an enemy", () => {
+    const state = createInitialState();
+    const enemy = makeEnemy(2, 0); // close to minion
+    state.enemies.push(enemy);
+    const minion = makeMinion(1, 0);
+    state.minions.push(minion);
+
+    updateMinions(state, 1 / 60);
+
+    expect(minion.aiState).toBe("windup");
+    expect(minion.targetId).toBe(enemy.id);
+  });
+
+  it("returns to roaming if target dies during windup", () => {
+    const state = createInitialState();
+    const enemy = makeEnemy(2, 0);
+    state.enemies.push(enemy);
+    const minion = makeMinion(1, 0, {
+      aiState: "windup",
+      stateTimer: 0.2,
+      targetId: enemy.id,
+    });
+    state.minions.push(minion);
+
+    // Kill the enemy before windup finishes
+    enemy.alive = false;
+
+    updateMinions(state, 1 / 60);
+
+    expect(minion.aiState).toBe("roaming");
+    expect(minion.targetId).toBeNull();
+  });
+
+  it("bonk deals damage and transitions to cooldown", () => {
+    const state = createInitialState();
+    const enemy = makeEnemy(2, 0, { hp: 10 });
+    state.enemies.push(enemy);
+    const minion = makeMinion(1, 0, {
+      aiState: "bonk",
+      targetId: enemy.id,
+    });
+    state.minions.push(minion);
+
+    updateMinions(state, 1 / 60);
+
+    expect(enemy.hp).toBe(10 - MINION.damage);
+    expect(minion.aiState).toBe("cooldown");
+    expect(minion.stateTimer).toBeCloseTo(MINION.cooldownTime);
+  });
+
+  it("bonk kills enemy when hp drops to 0", () => {
+    const state = createInitialState();
+    const enemy = makeEnemy(2, 0, { hp: MINION.damage });
+    state.enemies.push(enemy);
+    const minion = makeMinion(1, 0, {
+      aiState: "bonk",
+      targetId: enemy.id,
+    });
+    state.minions.push(minion);
+
+    updateMinions(state, 1 / 60);
+
+    expect(enemy.alive).toBe(false);
+    expect(state.wave.kills).toBe(1);
+  });
+
+  it("enters recovery when flung at high velocity", () => {
+    const state = createInitialState();
+    const minion = makeMinion(5, 0);
+    // Simulate being flung by an explosion
+    minion.body.velocity.set(0, MINION.flingThreshold + 5, 0);
+    state.minions.push(minion);
+
+    updateMinions(state, 1 / 60);
+
+    expect(minion.aiState).toBe("recovery");
+    expect(minion.stateTimer).toBeCloseTo(MINION.recoveryTime);
+  });
+
+  it("recovers back to roaming after timer expires", () => {
+    const state = createInitialState();
+    const minion = makeMinion(5, 0, {
+      aiState: "recovery",
+      stateTimer: 0.01,
+    });
+    state.minions.push(minion);
+
+    updateMinions(state, 1 / 60);
+
+    expect(minion.aiState).toBe("roaming");
+  });
+
+  it("cooldown transitions to roaming after timer expires", () => {
+    const state = createInitialState();
+    const minion = makeMinion(5, 0, {
+      aiState: "cooldown",
+      stateTimer: 0.01,
+    });
+    state.minions.push(minion);
+
+    updateMinions(state, 1 / 60);
+
+    expect(minion.aiState).toBe("roaming");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 5. Config sanity — catch accidental bad values
 // ---------------------------------------------------------------------------
 describe("config sanity", () => {
   it("all fire rates are positive", () => {
@@ -230,9 +359,12 @@ describe("config sanity", () => {
     expect(state.wave.number).toBe(1);
     expect(state.wave.kills).toBe(0);
     // All attacks enabled by default
-    for (const atk of Object.values(state.tower.attacks)) {
+    for (const [key, atk] of Object.entries(state.tower.attacks)) {
       expect(atk.enabled).toBe(true);
-      expect(atk.fireRate).toBeGreaterThan(0);
+      // Minions don't use fireRate (they're persistent entities, not timed shots)
+      if (key !== "minions") {
+        expect(atk.fireRate).toBeGreaterThan(0);
+      }
     }
   });
 });
