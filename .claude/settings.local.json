@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(git -C \"x:\\\\Testing Projects\\\\LLM-base\" log --oneline -15)",
+      "Read(//x//**)"
     ]
   }
 }

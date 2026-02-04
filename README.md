@@ -24,6 +24,10 @@ This repo is designed to be **rewritten by an LLM** based on your game idea. The
 
 That's it. The AI reads `.llm/BOOTSTRAP.md` and handles the rest.
 
+### Switching Engine Paths
+
+Changed your mind about Web vs Godot? Clone this template fresh and re-run bootstrap. The cleanup is intentionally one-way to keep your project clean.
+
 ## What's in the Box
 
 ```

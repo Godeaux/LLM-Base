@@ -110,7 +110,9 @@ Best for: games needing a full engine (built-in physics, scene tree, animation, 
 
 **If recommending Godot, explain why it fits better than the web path (or vice versa).** Don't recommend Godot just because the game is 3D — Three.js handles plenty of 3D games. Recommend Godot when the user needs: built-in editor tooling, complex scene trees, built-in physics with editor integration, particle/shader editors, animation state machines, or plans to ship to desktop/console.
 
-End with: *"Does this stack sound right to you, or do you have preferences I should know about?"*
+End with something like:
+
+> "I recommend **[Web/Godot]** because [reasons]. This will configure your project for [path] and **remove the [other path] files** — you can always clone fresh if you change your mind later. Does this sound right?"
 
 **WAIT for confirmation before proceeding to Step 5.**
 
@@ -138,6 +140,10 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 7. **`README.md`** — Rewrite to describe THIS game, not the template. Keep the scripts table, update everything else.
 
+8. **Delete Godot template files** — Remove the `.godot-template/` directory entirely.
+
+9. **Trim `.llm/PATTERNS.md`** — Remove all GDScript examples from each pattern section, keeping only the TypeScript examples. This keeps the reference concise and relevant.
+
 ### If Path B (Godot/GDScript):
 
 **Templates available:** The `.godot-template/` folder contains starter files. Copy and customize them — don't start from scratch.
@@ -146,7 +152,17 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 2. **`.llm/DECISIONS.md`** — Fill in with Godot-specific decisions (version, rendering method, physics approach, scene structure). Replace the web-centric dependencies table with Godot equivalents (addons, GDExtensions if any).
 
-3. **Archive web-specific files** — Move `package.json`, `tsconfig.json`, `eslint.config.js`, `.prettierrc`, `src/`, and `tests/` into a new folder called `.web-archive/`. Don't delete them — the user may want npm tooling later (asset pipelines, build scripts, etc.). Add `.web-archive/` to `.gitignore` if they want to exclude it from version control.
+3. **Delete web-specific files** — Remove these files entirely:
+   - `package.json`
+   - `package-lock.json` (if exists)
+   - `tsconfig.json`
+   - `eslint.config.js`
+   - `.prettierrc`
+   - `src/` directory
+   - `tests/` directory
+   - `node_modules/` (if exists)
+
+   These are not archived. To switch to web path later, clone fresh and re-run bootstrap.
 
 4. **Copy and customize `project.godot`** — Start from `.godot-template/project.godot`:
    ```ini
@@ -190,6 +206,8 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
    ```
 
 9. **Delete or keep `.godot-template/`** — After copying, you can delete the template folder or keep it for reference. It won't interfere with Godot.
+
+10. **Trim `.llm/PATTERNS.md`** — Remove all TypeScript examples from each pattern section, keeping only the GDScript examples. This keeps the reference concise and relevant.
 
 ### Files to NOT touch (either path):
 - `.llm/PERSONAS.md` — useful as-is for ongoing development
