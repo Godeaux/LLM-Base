@@ -142,7 +142,9 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 8. **Delete Godot template files** — Remove the `.godot-template/` directory entirely.
 
-9. **Trim `.llm/PATTERNS.md`** — Remove all GDScript examples from each pattern section, keeping only the TypeScript examples. This keeps the reference concise and relevant.
+9. **Delete `.llm/PRINCIPLES-GODOT.md`** — Remove the Godot-specific principles file since we're using the web path.
+
+10. **Trim `.llm/PATTERNS.md`** — Remove all GDScript examples from each pattern section, keeping only the TypeScript examples. This keeps the reference concise and relevant.
 
 ### If Path B (Godot/GDScript):
 
@@ -207,11 +209,14 @@ Only after the user confirms (or adjusts) the tech stack, rewrite these files.
 
 9. **Delete or keep `.godot-template/`** — After copying, you can delete the template folder or keep it for reference. It won't interfere with Godot.
 
-10. **Trim `.llm/PATTERNS.md`** — Remove all TypeScript examples from each pattern section, keeping only the GDScript examples. This keeps the reference concise and relevant.
+10. **Delete `.llm/PRINCIPLES-WEB.md`** — Remove the web-specific principles file since we're using the Godot path.
+
+11. **Trim `.llm/PATTERNS.md`** — Remove all TypeScript examples from each pattern section, keeping only the GDScript examples. This keeps the reference concise and relevant.
 
 ### Files to NOT touch (either path):
 - `.llm/PERSONAS.md` — useful as-is for ongoing development
-- `.llm/PRINCIPLES.md` — useful as-is for ongoing development
+- `.llm/PRINCIPLES.md` — universal principles, useful for both paths
+- `.llm/PRINCIPLES-GODOT.md` or `.llm/PRINCIPLES-WEB.md` — whichever matches your path (the other gets deleted)
 - `.llm/BOOTSTRAP.md` — this file; leave it for reference
 - `CLAUDE.md` — project instructions; leave as-is
 - Don't create game-specific folders or systems yet
