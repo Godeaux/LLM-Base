@@ -34,7 +34,7 @@ fi
 
 if [ ! -f "$DISCOVERY" ]; then
   echo ""
-  echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md not found."
+  echo "COMMIT BLOCKED: .llm/DISCOVERY.md not found."
   echo ""
   echo "You're trying to commit game code, but the bootstrap process"
   echo "hasn't been completed yet."
@@ -52,7 +52,7 @@ fi
 # Check if the template placeholders are still present
 if grep -q "_one-sentence description_" "$DISCOVERY" || grep -q "_plays like X meets Y_" "$DISCOVERY" || grep -q "_what the player DOES_" "$DISCOVERY"; then
   echo ""
-  echo "✋ COMMIT BLOCKED: .llm/DISCOVERY.md is still in template form."
+  echo "COMMIT BLOCKED: .llm/DISCOVERY.md is still in template form."
   echo ""
   echo "You're trying to commit game code, but the bootstrap conversation"
   echo "hasn't been completed yet."
@@ -67,10 +67,57 @@ if grep -q "_one-sentence description_" "$DISCOVERY" || grep -q "_plays like X m
   exit 1
 fi
 
-# Optional: Run linting if available (Godot path only)
+# --- Godot validation (lint + engine parse check) ---
 if [ "$IS_GODOT" = true ]; then
+
+  # Style lint with gdlint (if installed)
   if command -v gdlint > /dev/null 2>&1; then
     echo "Running gdlint on staged GDScript files..."
     echo "$STAGED_CODE" | xargs gdlint || exit 1
+  fi
+
+  # Engine-level parse/type validation with Godot headless.
+  # Finds Godot via: $GODOT env var > PATH > common install locations.
+  GODOT_BIN=""
+  if [ -n "$GODOT" ]; then
+    GODOT_BIN="$GODOT"
+  elif command -v godot > /dev/null 2>&1; then
+    GODOT_BIN="godot"
+  elif command -v godot.exe > /dev/null 2>&1; then
+    GODOT_BIN="godot.exe"
+  else
+    # Auto-detect: newest Godot exe on Desktop (common for Windows dev setups)
+    DESKTOP="$HOME/Desktop"
+    if [ -d "$DESKTOP" ]; then
+      FOUND=$(ls -1t "$DESKTOP"/Godot_v*.exe 2>/dev/null | head -1)
+      if [ -n "$FOUND" ]; then
+        GODOT_BIN="$FOUND"
+      fi
+    fi
+  fi
+
+  if [ -n "$GODOT_BIN" ]; then
+    echo "Validating GDScript with Godot headless ($GODOT_BIN)..."
+    VALIDATE_LOG=$(mktemp)
+    "$GODOT_BIN" --headless --quit 2>&1 | tee "$VALIDATE_LOG" > /dev/null
+
+    if grep -qE "SCRIPT ERROR|Failed to load script" "$VALIDATE_LOG"; then
+      echo ""
+      echo "========================================="
+      echo "  COMMIT BLOCKED: GDScript errors found"
+      echo "========================================="
+      echo ""
+      grep -E "SCRIPT ERROR|Failed to load script|Parse Error|Compile Error" "$VALIDATE_LOG"
+      echo ""
+      echo "Fix the errors above before committing."
+      echo "To skip this check (not recommended): git commit --no-verify"
+      rm -f "$VALIDATE_LOG"
+      exit 1
+    fi
+    rm -f "$VALIDATE_LOG"
+    echo "GDScript validation passed."
+  else
+    echo "Warning: Godot not found. Skipping engine-level script validation."
+    echo "Set the GODOT env var or add Godot to PATH to enable this check."
   fi
 fi

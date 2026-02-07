@@ -7,73 +7,61 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  validate:
     runs-on: ubuntu-latest
 
-    # Only run if this is the web/TypeScript path (package.json exists)
-    # Godot projects will skip this workflow
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check if web project
-        id: check-web
-        run: |
-          if [ -f "package.json" ]; then
-            echo "is_web=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_web=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup Node.js
-        if: steps.check-web.outputs.is_web == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        if: steps.check-web.outputs.is_web == 'true'
-        run: npm ci
-
-      - name: Lint
-        if: steps.check-web.outputs.is_web == 'true'
-        run: npm run lint
-
-      - name: Type check
-        if: steps.check-web.outputs.is_web == 'true'
-        run: npm run build
-
-      - name: Test
-        if: steps.check-web.outputs.is_web == 'true'
-        run: npm test
-
-      # Godot CI steps (when package.json doesn't exist)
-      - name: Setup Python (for gdtoolkit)
-        if: steps.check-web.outputs.is_web == 'false'
+      # --- GDScript style checks (gdtoolkit) ---
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install gdtoolkit
-        if: steps.check-web.outputs.is_web == 'false'
         run: pip install gdtoolkit
 
       - name: Lint GDScript
-        if: steps.check-web.outputs.is_web == 'false'
         run: |
-          # Find all .gd files and lint them (skip .godot-template if it exists)
-          if find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" | grep -q .; then
-            gdlint $(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*")
+          GD_FILES=$(find . -name "*.gd" -not -path "./.godot/*" -not -path "./.godot-template/*")
+          if [ -n "$GD_FILES" ]; then
+            gdlint $GD_FILES
           else
-            echo "No GDScript files found to lint."
+            echo "No GDScript files found."
           fi
 
       - name: Check GDScript formatting
-        if: steps.check-web.outputs.is_web == 'false'
         run: |
-          # Check formatting on all .gd files (skip templates and cache)
-          if find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" | grep -q .; then
-            gdformat --check $(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*")
+          GD_FILES=$(find . -name "*.gd" -not -path "./.godot/*" -not -path "./.godot-template/*")
+          if [ -n "$GD_FILES" ]; then
+            gdformat --check $GD_FILES
           else
-            echo "No GDScript files found to check."
+            echo "No GDScript files found."
+          fi
+
+      # --- Godot engine parse/type validation ---
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: "4.6.0"
+
+      - name: Import Godot project
+        run: godot --headless --import --quit 2>&1 || true
+
+      - name: Validate GDScript (parse + type errors)
+        run: |
+          # Godot returns 0 even on script errors, so we grep the output.
+          godot --headless --quit 2>&1 | tee /tmp/godot_validate.log
+
+          if grep -qE "SCRIPT ERROR|Failed to load script" /tmp/godot_validate.log; then
+            echo ""
+            echo "========================================="
+            echo "  GDScript validation FAILED"
+            echo "========================================="
+            echo ""
+            grep -E "SCRIPT ERROR|Failed to load script|Parse Error|Compile Error" /tmp/godot_validate.log
+            exit 1
+          else
+            echo "GDScript validation passed."
           fi

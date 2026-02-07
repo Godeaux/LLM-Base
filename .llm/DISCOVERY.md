@@ -1,6 +1,6 @@
 # Project Discovery
 
-> This document starts as a questionnaire. After the bootstrap conversation, the LLM rewrites it into a filled-in design document for your specific game. If the fields below are still blank, the bootstrap hasn't happened yet — start by describing your game idea.
+> Trojan Horse — a wizard-led payload escort tower defense with Pikmin-style minions across Greek mythological locations.
 
 ---
 
@@ -8,11 +8,11 @@
 
 | Field | Answer |
 |-------|--------|
-| **Pitch** | _one-sentence description_ |
-| **References** | _plays like X meets Y_ |
-| **Hook** | _what makes it interesting_ |
-| **Art direction** | _visual style and vibe_ |
-| **Audio direction** | _soundtrack and SFX feel_ |
+| **Pitch** | Escort a Trojan Horse through Greek mythological locations by summoning and positioning Pikmin-style minions to defend against waves of enemies |
+| **References** | Pikmin (minion command), Into the Breach (isometric tactical), Left 4 Dead (wave-based checkpoint pacing), Kingdom Wars TD (visual perspective) |
+| **Hook** | Dual minion command modes (pin in place vs. follow wizard) create constant tactical repositioning as the payload advances |
+| **Art direction** | 3D geometric/stylized with toon shaders, fixed isometric camera, Greek palette (golds, marble whites, deep Mediterranean blues, olive greens). Code-generated placeholder art designed for eventual asset replacement |
+| **Audio direction** | Deferred — no audio in initial development |
 
 ---
 
@@ -20,13 +20,13 @@
 
 | Field | Answer |
 |-------|--------|
-| **Core verb** | _what the player DOES_ |
-| **Perspective** | _2D top-down / side-scroller / 3D first-person / etc._ |
-| **30-second loop** | _what a typical moment looks like_ |
-| **Failure mode** | _how the player loses_ |
-| **Progression** | _how the player advances_ |
-| **Session length** | _target play session_ |
-| **Multiplayer** | _none / local / online_ |
+| **Core verb** | Summon and position minions |
+| **Perspective** | Fixed isometric (2.5D — 3D rendering with fixed camera angle) |
+| **30-second loop** | Summon minions near the Trojan Horse, position them to intercept incoming enemies, reposition as the payload advances and new threats emerge from different directions |
+| **Failure mode** | Trojan Horse destroyed — return to last checkpoint |
+| **Progression** | Unlock new minion types, enemies develop new abilities, maps become more complex. Details beyond run 1 deferred |
+| **Session length** | ~20 minutes for a full run (5 maps) |
+| **Multiplayer** | None (single player) |
 
 ---
 
@@ -34,10 +34,21 @@
 
 The smallest thing that's playable. Defined after the core loop is clear.
 
-- [ ] **Player can:** ___
-- [ ] **Challenge is:** ___
-- [ ] **Success means:** ___
-- [ ] **Failure means:** ___
+- [x] **Player can:** Move wizard around the map, summon one minion type, toggle minion between stay/follow modes
+- [x] **Challenge is:** Enemies attack the Trojan Horse as it moves along a predefined path
+- [x] **Success means:** Trojan Horse reaches the end of the path intact
+- [x] **Failure means:** Trojan Horse health reaches zero
+
+---
+
+## Map Design
+
+Maps are procedurally assembled from pre-built tile pieces. Key concepts:
+
+- **Tile-based assembly:** Each map is built from interconnected tile segments with standardized entry/exit points
+- **Branching paths:** Paths may fork, giving the player route choices
+- **Greek locations:** 5 distinct mythological locations per run (River Styx, Mount Olympus, the Labyrinth, Elysian Fields, Gates of Troy)
+- **Procedural variety:** A sufficient set of tile variants per location ensures maps feel unique across runs
 
 ---
 

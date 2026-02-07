@@ -1,0 +1,19 @@
+# GDScript linting configuration
+# See: https://github.com/Scony/godot-gdscript-toolkit/wiki/3.-Linter
+
+max-line-length: 100
+tab-size: 4
+
+# Naming conventions
+class-name-pascal-case: true
+function-name-snake-case: true
+variable-name-snake-case: true
+constant-name-all-caps: true
+
+# Private member prefix
+private-method-prefix: "_"
+private-variable-prefix: "_"
+
+# Code quality
+max-function-arguments: 6
+max-returns: 4

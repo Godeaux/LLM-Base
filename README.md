@@ -1,90 +1,37 @@
-# Game Foundation
+# Trojan Horse
 
-Minimal starting point for LLM-assisted game development. Clone it, open your AI coding tool, and describe the game you want to build.
+A wizard-led payload escort tower defense set in Greek mythology. Summon and command Pikmin-style minions to protect the Trojan Horse as it moves through mythological locations.
 
-## How It Works
+## Running the Game
 
-This repo is designed to be **rewritten by an LLM** based on your game idea. The `.llm/` folder contains instructions that guide the AI through a structured conversation:
+1. Open this folder in Godot 4.6+
+2. Press F5 (or Play button) to run
 
-1. **You describe your game** — even a rough idea is fine
-2. **The AI asks clarifying questions** — vision, gameplay, technical scope
-3. **You answer** — briefly, in your own words
-4. **The AI rewrites this repo** — package.json, tsconfig, src/index.ts, and the docs all get tailored to your specific game
-5. **You start building** — with a configured foundation instead of a blank slate
+## Linting
 
-## Quick Start
+Install gdtoolkit: `pip install gdtoolkit`
+Run: `gdlint .`
 
-1. Clone this repo
-2. Open it in your AI coding editor (Windsurf, Cursor, VS Code + Claude, etc.)
-3. Say: *"I want to build [your game idea]. Let's get started."*
-4. Answer the questions (vision → gameplay → technical)
-5. The AI configures everything, then:
-   - **Web path (TypeScript):** `npm install && npm run dev`
-   - **Godot path (GDScript):** Open in Godot 4.3+ and press Play
-
-That's it. The AI reads `.llm/BOOTSTRAP.md` and handles the rest.
-
-### Switching Engine Paths
-
-Changed your mind about Web vs Godot? Clone this template fresh and re-run bootstrap. The cleanup is intentionally one-way to keep your project clean.
-
-## What's in the Box
+## Project Structure
 
 ```
-.llm/
-  BOOTSTRAP.md   → Instructions for the AI (drives the initial conversation)
-  DISCOVERY.md   → Design document (filled in during bootstrap)
-  DECISIONS.md   → Technical decisions log (filled in during bootstrap)
-  PERSONAS.md    → Specialized roles the AI can adopt during development
-  PRINCIPLES.md  → Development guidelines
-  PATTERNS.md    → Reference implementations (FSM, events, save/load, pooling, etc.)
-.godot-template/ → Godot starter files (used if you choose the Godot path)
-src/
-  index.ts       → Empty entry point (rewritten during bootstrap)
-tests/           → Test suite directory
+main.tscn / main.gd    — Entry scene (3D isometric)
+.llm/                   — AI development context
+  DISCOVERY.md          — Game design document
+  DECISIONS.md          — Technical decisions
+  PERSONAS.md           — AI persona definitions
+  PRINCIPLES.md         — Development guidelines
+  PATTERNS-*.md         — Reference implementations
+  TOOLING.md            — Engine-specific tooling guide
 ```
 
-### Before bootstrap: a template
-### After bootstrap: your game's foundation
+## Design Summary
 
-## Auto-Persona System
+- **Genre:** Payload escort tower defense
+- **Perspective:** Fixed isometric (2.5D)
+- **Core mechanic:** Summon minions, choose pin-in-place or follow mode
+- **Theme:** Greek mythology (River Styx, Mount Olympus, the Labyrinth, etc.)
+- **Session:** ~20 minutes per full run (5 maps)
+- **Engine:** Godot 4.6, GDScript, Forward+ rendering, Jolt physics
 
-The AI automatically adopts specialized expertise based on your request — no explicit invocation needed. It assesses each question and applies the relevant lens:
-
-| Domain | Focus |
-|--------|-------|
-| **@architect** | Structure, performance, technical decisions |
-| **@gameplay** | Core loop, fun, balance, progression |
-| **@ui** | Interface, input, feedback, accessibility |
-| **@systems** | Individual game systems, data design |
-| **@network** | Multiplayer, synchronization, infrastructure |
-| **@quality** | Testing, debugging, stability |
-
-**Example:** *"The combat feels flat"* — AI automatically applies @gameplay lens (balance, pacing, "juice").
-
-You can still force a specific persona with `@persona` if needed, but the AI will typically figure it out.
-
-## Scripts
-
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start dev server (configured during bootstrap) |
-| `npm run build` | Type-check with TypeScript |
-| `npm run lint` | Lint with ESLint |
-| `npm run lint:fix` | Auto-fix lint issues |
-| `npm run format` | Format with Prettier |
-| `npm run format:check` | Check formatting |
-| `npm test` | Run tests with Vitest |
-| `npm run test:watch` | Run tests in watch mode |
-
-## Principles (summary)
-
-- Grow structure, don't prescribe it
-- Small files, clear names
-- Data over behavior
-- Explicit over clever
-- Ask before building
-- Iterate in playable increments
-- Make it work, make it right, make it fast (in that order)
-
-See `.llm/PRINCIPLES.md` for full details.
+See `.llm/DISCOVERY.md` for full design details and `.llm/DECISIONS.md` for technical architecture.

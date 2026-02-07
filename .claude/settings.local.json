@@ -7,7 +7,19 @@
       "Bash(grep:*)",
       "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\PATTERNS.md\")",
       "Bash(ls -la \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\"\" 2>&1 || echo \"Directory may not exist or is empty \")",
-      "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\\\\PATTERNS.md\")"
+      "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\\\\PATTERNS.md\")",
+      "Bash(del \"x:\\\\Testing Projects\\\\GoPho\\\\Sample Project\\\\tiles\\\\tile_curve_factory.gd\")",
+      "Bash(del \"x:\\\\Testing Projects\\\\GoPho\\\\Sample Project\\\\tiles\\\\MapTile.tscn\")",
+      "Bash(gdlint:*)",
+      "Bash(where /r \"C:\\\\Users\\\\swope\" Godot*.exe)",
+      "Bash(powershell:*)",
+      "Bash(\"C:\\\\Users\\\\swope\\\\Desktop\\\\Godot_v4.6-stable_win64.exe\" --headless --quit)",
+      "WebFetch(domain:github.com)",
+      "Bash(\"C:\\\\Users\\\\swope\\\\Desktop\\\\Godot_v4.6-stable_win64.exe\" --headless --import --quit)",
+      "Bash(ren \"x:\\\\Testing Projects\\\\GoPho\\\\Sample Project\\\\tiles\\\\tile_data.gd\" tile_defs.gd)"
+    ],
+    "additionalDirectories": [
+      "x:\\Testing Projects\\GoPho\\Sample Project"
     ]
   }
 }

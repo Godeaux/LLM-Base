@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://cbbog1vuxbgrr"]
+
+[ext_resource type="Script" uid="uid://cpskyppugnxy5" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://brpow8pxuywum" path="res://isometric_camera.gd" id="2_camera"]
+[ext_resource type="PackedScene" path="res://Wizard.tscn" id="3_wizard"]
+[ext_resource type="PackedScene" path="res://TrojanHorse.tscn" id="4_horse"]
+[ext_resource type="Script" uid="uid://bkytxi8wltxdp" path="res://map_manager.gd" id="5_map"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.12, 0.11, 0.18, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.3, 0.4, 1)
+ambient_light_energy = 0.5
+
+[node name="Main" type="Node3D" unique_id=1031966274]
+script = ExtResource("1_main")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=416693964]
+transform = Transform3D(0.7071067, -0.29883623, 0.64085627, 0, 0.90630776, 0.4226182, -0.7071067, -0.29883623, 0.64085627, 10, 10, 9.83339)
+projection = 1
+size = 20.0
+near = 0.1
+far = 100.0
+script = ExtResource("2_camera")
+target_path = NodePath("../Wizard")
+secondary_target_path = NodePath("../TrojanHorse")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1356299274]
+transform = Transform3D(0.866025, 0.25, -0.433013, 0, 0.866025, 0.5, 0.5, -0.433013, 0.75, 0, 10, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1713529762]
+environment = SubResource("Environment_1")
+
+[node name="Wizard" parent="." unique_id=633187650 instance=ExtResource("3_wizard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.68004346, 0)
+
+[node name="MapManager" type="Node3D" parent="." unique_id=1277522346]
+script = ExtResource("5_map")
+
+[node name="TrojanHorse" parent="." unique_id=574198179 instance=ExtResource("4_horse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.440165)
