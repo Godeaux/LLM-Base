@@ -11,8 +11,16 @@ extends Node3D
 
 # --- Built-in virtual methods ---
 func _ready() -> void:
-	print("Trojan Horse — tile-based map system.")
-	_map_manager.build_test_map()
+	print("Trojan Horse — procedural map generation.")
+	_map_manager.generate_map({
+		"columns": 50,
+		"primary_dir": TileDefs.Edge.EAST,
+		"wander_budget": 3,
+		"wander_chance": 0.35,
+		"fork_interval": 8,
+		"fork_merge_offset": 4,
+		"seed": 0,
+	})
 	var start_tile := _map_manager.get_start_tile()
 	_wizard.global_position = start_tile.global_position + Vector3(0.0, 0.68, 0.0)
 	_trojan_horse.initialize(_map_manager)

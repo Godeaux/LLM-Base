@@ -46,6 +46,16 @@ static func edge_to_grid_offset(edge: Edge) -> Vector2i:
 	return Vector2i.ZERO
 
 
+static func perpendicular_edges(primary: Edge) -> Array[Edge]:
+	## Returns the two edges perpendicular to the given direction.
+	match primary:
+		Edge.EAST, Edge.WEST:
+			return [Edge.NORTH, Edge.SOUTH]
+		Edge.NORTH, Edge.SOUTH:
+			return [Edge.EAST, Edge.WEST]
+	return []
+
+
 static func edge_from_initial(initial: String) -> int:
 	## Returns Edge value from single-letter initial, or -1 if invalid.
 	match initial:
