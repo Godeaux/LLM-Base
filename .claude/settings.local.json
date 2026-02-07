@@ -16,7 +16,8 @@
       "Bash(\"C:\\\\Users\\\\swope\\\\Desktop\\\\Godot_v4.6-stable_win64.exe\" --headless --quit)",
       "WebFetch(domain:github.com)",
       "Bash(\"C:\\\\Users\\\\swope\\\\Desktop\\\\Godot_v4.6-stable_win64.exe\" --headless --import --quit)",
-      "Bash(ren \"x:\\\\Testing Projects\\\\GoPho\\\\Sample Project\\\\tiles\\\\tile_data.gd\" tile_defs.gd)"
+      "Bash(ren \"x:\\\\Testing Projects\\\\GoPho\\\\Sample Project\\\\tiles\\\\tile_data.gd\" tile_defs.gd)",
+      "Bash(ls:*)"
     ],
     "additionalDirectories": [
       "x:\\Testing Projects\\GoPho\\Sample Project"

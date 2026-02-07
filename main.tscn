@@ -5,6 +5,9 @@
 [ext_resource type="PackedScene" path="res://Wizard.tscn" id="3_wizard"]
 [ext_resource type="PackedScene" path="res://TrojanHorse.tscn" id="4_horse"]
 [ext_resource type="Script" uid="uid://bkytxi8wltxdp" path="res://map_manager.gd" id="5_map"]
+[ext_resource type="Script" path="res://minion_manager.gd" id="6_minion_mgr"]
+[ext_resource type="Script" path="res://player_input_handler.gd" id="7_input"]
+[ext_resource type="Script" path="res://wave_spawner.gd" id="8_wave"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -38,6 +41,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.68004346, 0)
 
 [node name="MapManager" type="Node3D" parent="." unique_id=1277522346]
 script = ExtResource("5_map")
+
+[node name="MinionManager" type="Node" parent="."]
+script = ExtResource("6_minion_mgr")
+
+[node name="PlayerInputHandler" type="Node" parent="."]
+script = ExtResource("7_input")
+
+[node name="WaveSpawner" type="Node" parent="."]
+script = ExtResource("8_wave")
 
 [node name="TrojanHorse" parent="." unique_id=574198179 instance=ExtResource("4_horse")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.440165)

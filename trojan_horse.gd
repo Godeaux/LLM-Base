@@ -54,6 +54,10 @@ func _process(delta: float) -> void:
 
 
 # --- Public methods ---
+func get_current_tile() -> MapTile:
+	return _current_tile
+
+
 func initialize(manager: MapManager) -> void:
 	_map_manager = manager
 
