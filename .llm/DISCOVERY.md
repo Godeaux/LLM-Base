@@ -51,7 +51,8 @@ After first playable, grow iteratively:
 4. Repeat
 
 **Quality checks every increment:**
-- `npm run build` — no type errors
-- `npm run lint` — no lint warnings
-- `npm test` — no test failures
-- Add tests for new systems in `tests/` as you go
+- Build passes with no errors
+- Lint passes with no warnings
+- Tests pass
+- See `TOOLING.md` for engine-specific commands
+- Add tests for new systems as you go

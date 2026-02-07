@@ -25,6 +25,11 @@ Check `.llm/DISCOVERY.md` first:
   - `.llm/DECISIONS.md` — Tech stack and architecture
   - `.llm/PRINCIPLES.md` — Development guidelines
   - `.llm/PATTERNS.md` — Reference implementations (FSM, events, save/load, pooling, etc.)
+  - `.llm/TOOLING.md` — Engine-specific linting, testing, and tooling commands
+  - `.llm/SETUP.md` — Engine setup reference (from bootstrap)
+  - `.llm/LEARNINGS.md` — Non-obvious findings and gotchas
+
+  > **Note:** Pre-bootstrap, engine-specific files live in `.llm/web/` and `.llm/godot/` subfolders. During bootstrap Step 6, the chosen engine's files are promoted to `.llm/` root and the other engine's folder is deleted.
 
 ---
 
@@ -34,6 +39,7 @@ Check `.llm/DISCOVERY.md` first:
 - **One step at a time.** Don't combine conversation rounds or skip ahead.
 - **Iterate in playable increments.** Every change should leave the project buildable.
 - **Communicate difficulty.** Use the difficulty reference in PRINCIPLES.md to set expectations.
+- **Record surprises.** When something behaves contrary to reasonable assumptions, add an entry to `.llm/LEARNINGS.md` with the date and category. Only non-obvious findings — not basic documentation.
 
 ---
 

@@ -1,4 +1,4 @@
-# Game Development Patterns
+# Game Development Patterns — TypeScript
 
 Reference implementations for common patterns. These aren't templates to copy verbatim — they're canonical examples that demonstrate correct structure. Adapt to your specific needs.
 
@@ -7,8 +7,6 @@ Reference implementations for common patterns. These aren't templates to copy ve
 ## Finite State Machine (FSM)
 
 **When to use:** Player states (idle, running, jumping), enemy AI, UI screens, game phases. Any time an entity can be in exactly one state at a time.
-
-### TypeScript
 
 ```typescript
 type PlayerState = "idle" | "running" | "jumping" | "falling";
@@ -61,35 +59,6 @@ const playerFSM = createFSM<PlayerState>("idle", {
 });
 ```
 
-### GDScript
-
-```gdscript
-class_name StateMachine extends Node
-
-var current_state: String
-var states: Dictionary = {}
-
-func _ready() -> void:
-    # Override in subclass to define states
-    pass
-
-func add_state(name: String, handlers: Dictionary) -> void:
-    states[name] = handlers
-
-func transition(next_state: String) -> void:
-    if next_state == current_state:
-        return
-    if current_state and states[current_state].has("exit"):
-        states[current_state].exit.call()
-    current_state = next_state
-    if states[current_state].has("enter"):
-        states[current_state].enter.call()
-
-func _process(delta: float) -> void:
-    if current_state and states[current_state].has("update"):
-        states[current_state].update.call(delta)
-```
-
 **Common mistakes:**
 - Forgetting to call exit/enter on transitions
 - Allowing invalid state transitions (add validation if needed)
@@ -100,8 +69,6 @@ func _process(delta: float) -> void:
 ## Event Bus / Signals
 
 **When to use:** Decoupled communication between systems. UI reacting to game events. Achievements, analytics, audio triggers. Anywhere you'd otherwise pass callbacks through multiple layers.
-
-### TypeScript
 
 ```typescript
 type EventMap = {
@@ -144,35 +111,6 @@ events.emit("player:damaged", { amount: 10, source: "spike" });
 unsubscribe(); // Clean up when done
 ```
 
-### GDScript
-
-```gdscript
-# Autoload: EventBus.gd
-extends Node
-
-# Define signals
-signal player_damaged(amount: int, source: String)
-signal enemy_killed(enemy_id: String, position: Vector2)
-signal game_paused
-signal game_resumed
-
-# Convenience methods (optional)
-func emit_player_damaged(amount: int, source: String) -> void:
-    player_damaged.emit(amount, source)
-
-func emit_enemy_killed(enemy_id: String, position: Vector2) -> void:
-    enemy_killed.emit(enemy_id, position)
-```
-
-```gdscript
-# In any script that needs to listen:
-func _ready() -> void:
-    EventBus.player_damaged.connect(_on_player_damaged)
-
-func _on_player_damaged(amount: int, source: String) -> void:
-    print("Took %d damage from %s" % [amount, source])
-```
-
 **Common mistakes:**
 - Forgetting to unsubscribe (causes memory leaks, stale references)
 - Emitting events during iteration (use deferred emit if needed)
@@ -183,8 +121,6 @@ func _on_player_damaged(amount: int, source: String) -> void:
 ## Save/Load Serialization
 
 **When to use:** Every game that needs to persist state. Start simple, add versioning when you ship.
-
-### TypeScript
 
 ```typescript
 interface SaveData {
@@ -240,48 +176,6 @@ function deleteSave(): void {
 }
 ```
 
-### GDScript
-
-```gdscript
-class_name SaveManager extends Node
-
-const SAVE_PATH := "user://save.json"
-const CURRENT_VERSION := 1
-
-static func save(data: Dictionary) -> void:
-    data["version"] = CURRENT_VERSION
-    data["timestamp"] = Time.get_unix_time_from_system()
-
-    var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-    if file:
-        file.store_string(JSON.stringify(data))
-        file.close()
-
-static func load() -> Dictionary:
-    if not FileAccess.file_exists(SAVE_PATH):
-        return {}
-
-    var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
-    if not file:
-        return {}
-
-    var content := file.get_as_text()
-    file.close()
-
-    var data = JSON.parse_string(content)
-    if data is Dictionary:
-        return _migrate(data)
-    return {}
-
-static func _migrate(data: Dictionary) -> Dictionary:
-    # Handle version migrations here
-    return data
-
-static func delete_save() -> void:
-    if FileAccess.file_exists(SAVE_PATH):
-        DirAccess.remove_absolute(SAVE_PATH)
-```
-
 **Common mistakes:**
 - Not versioning saves from day one (makes migration painful)
 - Saving non-serializable data (functions, circular references)
@@ -293,8 +187,6 @@ static func delete_save() -> void:
 ## Object Pool
 
 **When to use:** Frequently spawned/destroyed objects — bullets, particles, enemies. Reduces garbage collection pressure and allocation overhead.
-
-### TypeScript
 
 ```typescript
 interface Poolable {
@@ -359,50 +251,6 @@ bullet.vx = 10;
 bulletPool.release(bullet);
 ```
 
-### GDScript
-
-```gdscript
-class_name ObjectPool extends Node
-
-var _scene: PackedScene
-var _pool: Array[Node] = []
-var _active: Array[Node] = []
-
-func _init(scene: PackedScene, initial_size: int = 10) -> void:
-    _scene = scene
-    for i in initial_size:
-        var obj := _scene.instantiate()
-        obj.set_process(false)
-        obj.hide()
-        _pool.append(obj)
-
-func acquire() -> Node:
-    var obj: Node
-    if _pool.is_empty():
-        obj = _scene.instantiate()
-    else:
-        obj = _pool.pop_back()
-
-    obj.set_process(true)
-    obj.show()
-    _active.append(obj)
-
-    if obj.has_method("reset"):
-        obj.reset()
-
-    return obj
-
-func release(obj: Node) -> void:
-    if obj in _active:
-        _active.erase(obj)
-        obj.set_process(false)
-        obj.hide()
-        _pool.append(obj)
-
-func get_active_count() -> int:
-    return _active.size()
-```
-
 **Common mistakes:**
 - Forgetting to reset state when reusing objects
 - Not releasing objects back to pool
@@ -414,8 +262,6 @@ func get_active_count() -> int:
 ## Fixed vs Variable Timestep
 
 **When to use:** Fixed timestep for physics, AI, gameplay logic. Variable timestep for rendering, visual interpolation.
-
-### TypeScript
 
 ```typescript
 // Game loop with fixed timestep for logic, variable for rendering
@@ -457,25 +303,6 @@ function render(alpha: number) {
 }
 ```
 
-### GDScript
-
-```gdscript
-# Godot handles this automatically:
-# _physics_process(delta) = fixed timestep (default 60/sec)
-# _process(delta) = variable timestep (every frame)
-
-extends Node
-
-func _physics_process(delta: float) -> void:
-    # Physics, gameplay logic — consistent dt
-    update_physics(delta)
-    update_ai(delta)
-
-func _process(delta: float) -> void:
-    # Rendering, visual effects — variable dt
-    update_visuals(delta)
-```
-
 **Common mistakes:**
 - Using variable timestep for physics (causes inconsistent behavior)
 - Not capping frame time (causes "spiral of death" on slow frames)
@@ -486,8 +313,6 @@ func _process(delta: float) -> void:
 ## Component Pattern
 
 **When to use:** When entities need flexible, composable behaviors. Alternative to deep inheritance hierarchies.
-
-### TypeScript
 
 ```typescript
 interface Component {
@@ -554,39 +379,6 @@ function movementSystem(entities: Entity[], dt: number) {
 }
 ```
 
-### GDScript
-
-```gdscript
-# Godot's node system IS the component pattern
-# Compose behaviors by adding child nodes
-
-# Player.tscn structure:
-# - Player (CharacterBody2D)
-#   - HealthComponent
-#   - MovementComponent
-#   - WeaponComponent
-#   - Sprite2D
-
-# HealthComponent.gd
-class_name HealthComponent extends Node
-
-@export var max_health: int = 100
-var current_health: int
-
-func _ready() -> void:
-    current_health = max_health
-
-func damage(amount: int) -> void:
-    current_health = max(0, current_health - amount)
-    if current_health == 0:
-        get_parent().queue_free()  # Or emit signal
-
-# In Player.gd, access components:
-func _ready() -> void:
-    var health := $HealthComponent as HealthComponent
-    health.damage(10)
-```
-
 **Common mistakes:**
 - Over-engineering for small games (inheritance is fine for simple cases)
 - Components that know too much about each other (use events/signals)
@@ -597,8 +389,6 @@ func _ready() -> void:
 ## Command Pattern
 
 **When to use:** Input handling, undo/redo, replays, AI action queues, networked actions.
-
-### TypeScript
 
 ```typescript
 interface Command {
@@ -663,56 +453,6 @@ document.addEventListener("keydown", (e) => {
     commandHistory.execute(command);
   }
 });
-```
-
-### GDScript
-
-```gdscript
-class_name Command extends RefCounted
-
-func execute() -> void:
-    pass
-
-func undo() -> void:
-    pass
-
-# MoveCommand.gd
-class_name MoveCommand extends Command
-
-var _entity: Node2D
-var _delta: Vector2
-
-func _init(entity: Node2D, delta: Vector2) -> void:
-    _entity = entity
-    _delta = delta
-
-func execute() -> void:
-    _entity.position += _delta
-
-func undo() -> void:
-    _entity.position -= _delta
-
-# CommandHistory.gd
-class_name CommandHistory extends RefCounted
-
-var _history: Array[Command] = []
-var _index: int = -1
-
-func execute(command: Command) -> void:
-    _history.resize(_index + 1)
-    command.execute()
-    _history.append(command)
-    _index += 1
-
-func undo() -> void:
-    if _index >= 0:
-        _history[_index].undo()
-        _index -= 1
-
-func redo() -> void:
-    if _index < _history.size() - 1:
-        _index += 1
-        _history[_index].execute()
 ```
 
 **Common mistakes:**
