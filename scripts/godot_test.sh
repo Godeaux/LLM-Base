@@ -48,17 +48,8 @@ if [ ! -f "addons/gdunit4/bin/GdUnitCmdTool.gd" ]; then
   exit 1
 fi
 
-# Resolve Godot binary: .gdenv file > GODOT_BIN env var > 'godot' in PATH
-GODOT=""
-if [ -f "$PROJECT_ROOT/.gdenv" ]; then
-  GODOT=$(grep "^GODOT_BIN=" "$PROJECT_ROOT/.gdenv" | cut -d= -f2 | tr -d '"' | tr -d "'")
-fi
-if [ -z "$GODOT" ] && [ -n "${GODOT_BIN:-}" ]; then
-  GODOT="$GODOT_BIN"
-fi
-if [ -z "$GODOT" ] && command -v godot > /dev/null 2>&1; then
-  GODOT="godot"
-fi
+# Resolve Godot binary (shared logic)
+. "$SCRIPT_DIR/resolve_godot.sh"
 
 if [ -z "$GODOT" ]; then
   echo "${YELLOW}WARNING: Godot binary not found.${NC}"

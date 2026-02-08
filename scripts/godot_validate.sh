@@ -50,17 +50,8 @@ case "${1:-}" in
     ;;
 esac
 
-# Resolve Godot binary: .gdenv file > GODOT_BIN env var > 'godot' in PATH
-GODOT=""
-if [ -f "$PROJECT_ROOT/.gdenv" ]; then
-  GODOT=$(grep "^GODOT_BIN=" "$PROJECT_ROOT/.gdenv" | cut -d= -f2 | tr -d '"' | tr -d "'")
-fi
-if [ -z "$GODOT" ] && [ -n "${GODOT_BIN:-}" ]; then
-  GODOT="$GODOT_BIN"
-fi
-if [ -z "$GODOT" ] && command -v godot > /dev/null 2>&1; then
-  GODOT="godot"
-fi
+# Resolve Godot binary (shared logic)
+. "$SCRIPT_DIR/resolve_godot.sh"
 
 # Find all .gd files (skip .godot-template/, .godot/ cache, and addons/)
 GD_FILES=$(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" -not -path "./addons/*" 2>/dev/null || true)
@@ -117,9 +108,9 @@ if [ "$RUN_HEADLESS" = true ]; then
     GODOT_OUTPUT=$(timeout 30 "$GODOT" --headless --quit 2>&1) && GODOT_EXIT=0 || GODOT_EXIT=$?
 
     # Check for error patterns in Godot output
-    if echo "$GODOT_OUTPUT" | grep -qi "error\|SCRIPT ERROR\|Parse Error\|Cannot"; then
+    if echo "$GODOT_OUTPUT" | grep -qE "SCRIPT ERROR|Parse Error|Cannot load source code|Failed loading resource"; then
       echo "${RED}Headless Godot reported errors:${NC}"
-      echo "$GODOT_OUTPUT" | grep -i "error\|SCRIPT ERROR\|Parse Error\|Cannot"
+      echo "$GODOT_OUTPUT" | grep -E "SCRIPT ERROR|Parse Error|Cannot load source code|Failed loading resource"
       FAILED=1
     elif [ "$GODOT_EXIT" -ne 0 ] && [ "$GODOT_EXIT" -ne 124 ]; then
       echo "${RED}Godot exited with code $GODOT_EXIT${NC}"

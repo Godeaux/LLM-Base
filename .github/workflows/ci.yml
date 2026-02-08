@@ -7,62 +7,72 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  detect:
     runs-on: ubuntu-latest
-
-    # Detects web (package.json) vs Godot (project.godot) and runs the appropriate checks
+    outputs:
+      is_web: ${{ steps.detect.outputs.is_web }}
+      is_godot: ${{ steps.detect.outputs.is_godot }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
-      - name: Check if web project
-        id: check-web
+      - name: Detect project type
+        id: detect
         run: |
           if [ -f "package.json" ]; then
             echo "is_web=true" >> $GITHUB_OUTPUT
+            echo "is_godot=false" >> $GITHUB_OUTPUT
+          elif [ -f "project.godot" ]; then
+            echo "is_web=false" >> $GITHUB_OUTPUT
+            echo "is_godot=true" >> $GITHUB_OUTPUT
           else
             echo "is_web=false" >> $GITHUB_OUTPUT
+            echo "is_godot=false" >> $GITHUB_OUTPUT
           fi
 
+  web:
+    needs: detect
+    if: needs.detect.outputs.is_web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
-        if: steps.check-web.outputs.is_web == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        if: steps.check-web.outputs.is_web == 'true'
         run: npm ci
 
       - name: Lint
-        if: steps.check-web.outputs.is_web == 'true'
         run: npm run lint
 
       - name: Type check
-        if: steps.check-web.outputs.is_web == 'true'
         run: npm run build
 
       - name: Test
-        if: steps.check-web.outputs.is_web == 'true'
         run: npm test
 
-      # Godot CI steps (when package.json doesn't exist)
+  godot:
+    needs: detect
+    if: needs.detect.outputs.is_godot == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Setup Python (for gdtoolkit)
-        if: steps.check-web.outputs.is_web == 'false'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install gdtoolkit
-        if: steps.check-web.outputs.is_web == 'false'
         run: pip install gdtoolkit
 
       - name: Lint GDScript
-        if: steps.check-web.outputs.is_web == 'false'
         run: |
-          # Find all .gd files and lint them (skip .godot-template if it exists)
           if find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" -not -path "./addons/*" | grep -q .; then
             gdlint $(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" -not -path "./addons/*")
           else
@@ -70,9 +80,7 @@ jobs:
           fi
 
       - name: Check GDScript formatting
-        if: steps.check-web.outputs.is_web == 'false'
         run: |
-          # Check formatting on all .gd files (skip templates and cache)
           if find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" -not -path "./addons/*" | grep -q .; then
             gdformat --check $(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" -not -path "./addons/*")
           else
@@ -80,21 +88,19 @@ jobs:
           fi
 
       - name: Setup Godot for headless validation
-        if: steps.check-web.outputs.is_web == 'false'
         uses: chickensoft-games/setup-godot@v2
         with:
           version: 4.6.0-stable
           use-dotnet: false
 
       - name: Run headless Godot validation
-        if: steps.check-web.outputs.is_web == 'false'
         run: |
           if [ -f "project.godot" ]; then
             echo "Running Godot headless to check for runtime errors..."
             GODOT_OUTPUT=$(timeout 30 godot --headless --quit 2>&1 || true)
-            if echo "$GODOT_OUTPUT" | grep -qi "error\|SCRIPT ERROR\|Parse Error\|Cannot"; then
+            if echo "$GODOT_OUTPUT" | grep -qE "SCRIPT ERROR|Parse Error|Cannot load source code|Failed loading resource"; then
               echo "Headless Godot detected errors:"
-              echo "$GODOT_OUTPUT" | grep -i "error\|SCRIPT ERROR\|Parse Error\|Cannot"
+              echo "$GODOT_OUTPUT" | grep -E "SCRIPT ERROR|Parse Error|Cannot load source code|Failed loading resource"
               exit 1
             fi
             echo "Headless Godot check passed."
@@ -103,7 +109,6 @@ jobs:
           fi
 
       - name: Run GdUnit4 tests
-        if: steps.check-web.outputs.is_web == 'false'
         run: |
           if [ -d "addons/gdunit4" ] && [ -d "tests" ]; then
             echo "Running GdUnit4 tests..."
