@@ -4,9 +4,10 @@
 # Runs gdlint, gdformat --check, and headless Godot to catch errors.
 #
 # Usage:
-#   ./scripts/godot_validate.sh           # Validate all .gd files
-#   ./scripts/godot_validate.sh --lint    # Only run linting (gdlint + gdformat)
+#   ./scripts/godot_validate.sh            # Validate all .gd files (lint + headless)
+#   ./scripts/godot_validate.sh --lint     # Only run linting (gdlint + gdformat)
 #   ./scripts/godot_validate.sh --headless # Only run headless Godot check
+#   ./scripts/godot_validate.sh --all      # Lint + headless + GdUnit4 tests
 #
 # Exit codes:
 #   0 = all checks passed
@@ -34,6 +35,7 @@ fi
 FAILED=0
 RUN_LINT=true
 RUN_HEADLESS=true
+RUN_TESTS=false
 
 # Parse arguments
 case "${1:-}" in
@@ -42,6 +44,9 @@ case "${1:-}" in
     ;;
   --headless)
     RUN_LINT=false
+    ;;
+  --all)
+    RUN_TESTS=true
     ;;
 esac
 
@@ -123,6 +128,28 @@ if [ "$RUN_HEADLESS" = true ]; then
       FAILED=1
     else
       echo "${GREEN}Headless Godot check passed.${NC}"
+    fi
+  fi
+fi
+
+# --- GdUnit4 tests (only with --all flag) ---
+if [ "$RUN_TESTS" = true ]; then
+  echo ""
+  echo "=== Running GdUnit4 tests ==="
+
+  if [ ! -d "addons/gdunit4" ]; then
+    echo "${YELLOW}GdUnit4 not found at addons/gdunit4/. Skipping tests.${NC}"
+    echo "Run: git submodule update --init --recursive"
+  elif [ ! -d "tests" ]; then
+    echo "${YELLOW}No tests/ directory found. Skipping tests.${NC}"
+  elif [ -z "$GODOT" ]; then
+    echo "${YELLOW}WARNING: Godot binary not found. Cannot run tests.${NC}"
+  else
+    if timeout 120 "$GODOT" --headless -s addons/gdunit4/bin/GdUnitCmdTool.gd --add "res://tests" --run-tests 2>&1; then
+      echo "${GREEN}GdUnit4 tests passed.${NC}"
+    else
+      echo "${RED}GdUnit4 tests failed.${NC}"
+      FAILED=1
     fi
   fi
 fi

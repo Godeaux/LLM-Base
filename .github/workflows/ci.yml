@@ -14,6 +14,8 @@ jobs:
     # Godot projects will skip this workflow
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Check if web project
         id: check-web
@@ -99,4 +101,14 @@ jobs:
             echo "Headless Godot check passed."
           else
             echo "No project.godot found. Skipping headless validation."
+          fi
+
+      - name: Run GdUnit4 tests
+        if: steps.check-web.outputs.is_web == 'false'
+        run: |
+          if [ -d "addons/gdunit4" ] && [ -d "tests" ]; then
+            echo "Running GdUnit4 tests..."
+            timeout 120 godot --headless -s addons/gdunit4/bin/GdUnitCmdTool.gd --add "res://tests" --run-tests
+          else
+            echo "No GdUnit4 addon or tests/ directory found. Skipping tests."
           fi

@@ -311,11 +311,37 @@ Godot is an editor-centric engine. Knowing when to use the editor vs code makes 
 
 ## Testing
 
-**Framework:** GdUnit4 (recommended). Install via AssetLib or add as a git submodule to `addons/gdunit4/`.
+**Framework:** GdUnit4, installed as a git submodule at `addons/gdunit4/` during bootstrap.
+
+### Setup (handled by bootstrap)
+
+GdUnit4 is added automatically during bootstrap Step 10:
+```bash
+git submodule add https://github.com/MikeSchulze/gdUnit4.git addons/gdunit4
+```
+
+Anyone cloning the bootstrapped project gets it with:
+```bash
+git clone --recurse-submodules <repo-url>
+```
+
+If already cloned without `--recurse-submodules`:
+```bash
+git submodule update --init --recursive
+```
+
+### Running tests
+
+| Method | Command |
+|--------|---------|
+| **Script (recommended)** | `./scripts/godot_test.sh` |
+| **Specific test file** | `./scripts/godot_test.sh res://tests/test_health.gd` |
+| **Inside Godot editor** | GdUnit4 panel → Run Tests |
+| **Raw command** | `godot --headless -s addons/gdunit4/bin/GdUnitCmdTool.gd --add res://tests --run-tests` |
+| **CI** | Runs automatically on every push |
 
 ### File conventions
-- Test files live alongside source: `player/health_component.gd` → `player/test_health_component.gd`
-- Or in a parallel `test/` folder mirroring the source structure
+- Test files live in `tests/` directory, mirroring the game's script structure
 - Test class name: `Test` + class under test: `TestHealthComponent`
 - Every test method starts with `test_`: `func test_damage_reduces_health()`
 

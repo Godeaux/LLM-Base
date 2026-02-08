@@ -51,6 +51,7 @@ Rewrite to describe THIS game, not the template. Keep the scripts table, update 
 Remove these entirely:
 - `.godot-template/` directory (Godot project templates)
 - `scripts/godot_validate.sh` (Godot headless validation script)
+- `scripts/godot_test.sh` (GdUnit4 test runner script)
 - Delete the `scripts/` directory if it's now empty
 
 ### Note on shared configuration files
