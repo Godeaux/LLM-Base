@@ -1,14 +1,6 @@
-[gd_resource type="Resource" script_class="MinionTypeData" format=3]
+[gd_resource type="Resource" script_class="MinionTypeData" format=3 uid="uid://5qgx8fw0r0f5"]
 
-[ext_resource type="Script" path="res://minion_type_data.gd" id="1"]
+[ext_resource type="Script" path="res://data/minion_type_data.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
-type_name = "Basic"
-max_health = 30.0
-move_speed = 4.0
-attack_damage = 8.0
-attack_interval = 1.2
-attack_range = 2.5
-leash_radius = 15.0
-color = Color(0.3, 0.5, 1.0, 1)

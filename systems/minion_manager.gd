@@ -4,7 +4,7 @@ extends Node
 
 
 # --- Constants ---
-const MINION_SCENE: PackedScene = preload("res://Minion.tscn")
+const MINION_SCENE: PackedScene = preload("res://entities/Minion.tscn")
 const MAX_MINIONS: int = 5
 
 

@@ -4,7 +4,7 @@ extends Node
 
 
 # --- Constants ---
-const ENEMY_SCENE: PackedScene = preload("res://Enemy.tscn")
+const ENEMY_SCENE: PackedScene = preload("res://entities/Enemy.tscn")
 const SPAWN_HEIGHT: float = 5.0
 const INITIAL_DELAY: float = 3.0
 const BETWEEN_WAVE_DELAY: float = 5.0

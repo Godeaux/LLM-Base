@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.6")
 
 [autoload]
 
-EventBus="*res://event_bus.gd"
+EventBus="*res://autoloads/event_bus.gd"
 
 [debug]
 
