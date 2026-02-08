@@ -77,3 +77,26 @@ jobs:
           else
             echo "No GDScript files found to check."
           fi
+
+      - name: Setup Godot for headless validation
+        if: steps.check-web.outputs.is_web == 'false'
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.0-stable
+          use-dotnet: false
+
+      - name: Run headless Godot validation
+        if: steps.check-web.outputs.is_web == 'false'
+        run: |
+          if [ -f "project.godot" ]; then
+            echo "Running Godot headless to check for runtime errors..."
+            GODOT_OUTPUT=$(timeout 30 godot --headless --quit 2>&1 || true)
+            if echo "$GODOT_OUTPUT" | grep -qi "error\|SCRIPT ERROR\|Parse Error\|Cannot"; then
+              echo "Headless Godot detected errors:"
+              echo "$GODOT_OUTPUT" | grep -i "error\|SCRIPT ERROR\|Parse Error\|Cannot"
+              exit 1
+            fi
+            echo "Headless Godot check passed."
+          else
+            echo "No project.godot found. Skipping headless validation."
+          fi

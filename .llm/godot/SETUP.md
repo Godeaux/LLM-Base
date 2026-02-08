@@ -95,11 +95,50 @@ func _ready() -> void:
 
 Copy `.godot-template/.gdlintrc` to the project root. This configures GDScript linting (enforces naming conventions, line length, etc.).
 
-### 7. Update `.husky/pre-commit`
+### 7. Install gdtoolkit (MANDATORY)
 
-The hook already supports Godot projects. If `gdlint` is installed locally, it will run on commit. Otherwise, CI handles linting.
+Install the GDScript linting and formatting toolkit immediately:
 
-### 8. Rewrite `README.md`
+```bash
+pip install gdtoolkit
+```
+
+Verify the installation:
+```bash
+gdlint --version
+gdformat --version
+```
+
+**This is not optional.** The pre-commit hook requires `gdlint` to be installed locally and will block commits if it is missing. Do not proceed until this is confirmed working.
+
+### 8. Verify headless Godot validation
+
+The repository includes `scripts/godot_validate.sh` which runs Godot in headless mode to catch runtime errors without opening the editor. Verify it works:
+
+```bash
+chmod +x scripts/godot_validate.sh
+./scripts/godot_validate.sh
+```
+
+This script:
+- Runs `gdlint` on all `.gd` files
+- Runs `gdformat --check` on all `.gd` files
+- Runs `godot --headless --quit` to load the project and catch parse/load errors
+
+The pre-commit hook calls this script automatically. If the `godot` binary is not in PATH, the hook will warn but still enforce linting. CI always runs the full validation including headless Godot.
+
+**Tell the user:** *"Make sure the `godot` command is accessible from your terminal. On Linux, this usually means adding Godot to your PATH. On macOS, you can symlink the binary. The pre-commit hook and CI both use headless Godot to catch errors automatically."*
+
+### 9. Update `.husky/pre-commit`
+
+The hook is already configured to:
+- **Require** `gdlint` on all staged `.gd` files (blocks commit if not installed)
+- **Run** headless Godot validation if the `godot` binary is in PATH
+- **Warn** if `godot` is not in PATH (CI will still catch errors)
+
+No manual changes needed — just confirm `gdlint` is installed (Step 7).
+
+### 10. Rewrite `README.md`
 
 Rewrite to describe the Godot project. Replace npm scripts table with Godot workflow:
 ```markdown
@@ -107,12 +146,26 @@ Rewrite to describe the Godot project. Replace npm scripts table with Godot work
 1. Open this folder in Godot 4.6+
 2. Press F5 (or Play button) to run
 
-## Linting
-Install gdtoolkit: `pip install gdtoolkit`
-Run: `gdlint .`
+## Prerequisites
+- Python 3.x with pip (for gdtoolkit)
+- Godot 4.6+ CLI accessible as `godot` in PATH (for headless validation)
+
+## Setup
+Install linting tools (required — pre-commit hook enforces this):
+```
+pip install gdtoolkit
 ```
 
-### 9. Clean up `.godot-template/`
+## Validation
+Run the full validation suite manually:
+```
+./scripts/godot_validate.sh
+```
+
+This runs gdlint, gdformat --check, and headless Godot to catch errors.
+```
+
+### 11. Clean up `.godot-template/`
 
 After copying the files you need, delete the `.godot-template/` folder. It won't interfere with Godot if left, but it's cleaner to remove.
 
@@ -133,6 +186,9 @@ After copying the files you need, delete the `.godot-template/` folder. It won't
 After setup is complete:
 
 1. Confirm `project.godot` is valid and the entry scene exists
-2. Tell the user: *"The foundation is configured. Open this folder in Godot 4.6 and hit Play to see the base scene. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
+2. Confirm `gdlint --version` runs successfully
+3. Run `./scripts/godot_validate.sh` and confirm it passes (or passes lint with a warning about missing `godot` binary)
+4. Make a test commit to confirm the pre-commit hook fires and enforces linting
+5. Tell the user: *"The foundation is configured with enforced linting and headless validation. Open this folder in Godot 4.6 and hit Play to see the base scene. Every commit will auto-check for lint errors and runtime issues. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
 
 Then transition to normal development using the personas in `PERSONAS.md`.

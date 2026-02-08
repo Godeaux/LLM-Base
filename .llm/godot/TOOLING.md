@@ -293,14 +293,16 @@ Godot is an editor-centric engine. Knowing when to use the editor vs code makes 
 
 ---
 
-## Linting & Formatting
+## Linting & Formatting (MANDATORY)
 
 - **gdtoolkit** provides `gdlint` (linting) and `gdformat` (formatting).
-- Install: `pip install gdtoolkit`
+- **Install is required during bootstrap:** `pip install gdtoolkit`
+- The pre-commit hook **blocks commits** if `gdlint` is not installed. This is not optional.
 - Run:
   ```bash
   gdlint .            # Lint all GDScript files
   gdformat .          # Format all GDScript files
+  gdformat --check .  # Check formatting without modifying files
   ```
 - Configuration lives in `.gdlintrc` at the project root.
 - Enable the static typing warnings listed above in Project Settings for additional safety.
@@ -392,13 +394,63 @@ func _ready() -> void:
 
 ---
 
+## Headless Godot Validation
+
+The project enforces headless Godot testing to catch runtime errors automatically — no manual editor checks needed.
+
+### What it does
+
+Running `godot --headless --quit` loads the project, parses all scripts, initializes autoloads, loads the main scene, and exits. Any GDScript parse errors, missing references, broken signals, or load failures are caught and reported.
+
+### How it runs
+
+| Context | Behavior |
+|---------|----------|
+| **Pre-commit hook** | Runs automatically if `godot` is in PATH. Warns if missing. |
+| **CI** | Always runs. Godot is installed via `chickensoft-games/setup-godot`. |
+| **Manual** | Run `./scripts/godot_validate.sh` (lint + headless in one command) |
+| **Lint only** | Run `./scripts/godot_validate.sh --lint` |
+| **Headless only** | Run `./scripts/godot_validate.sh --headless` |
+
+### Setting up the `godot` binary in PATH
+
+The headless check requires the `godot` command to be accessible from the terminal:
+
+- **Linux**: Download from godotengine.org, extract, symlink or add to PATH:
+  ```bash
+  sudo ln -s /path/to/Godot_v4.6-stable_linux.x86_64 /usr/local/bin/godot
+  ```
+- **macOS**: Symlink the binary from the app bundle:
+  ```bash
+  sudo ln -s /Applications/Godot.app/Contents/MacOS/Godot /usr/local/bin/godot
+  ```
+- **Windows (Git Bash)**: Add Godot's install directory to your system PATH.
+
+### What errors it catches
+
+- GDScript parse errors (syntax, missing references)
+- Missing autoload scripts
+- Broken scene resource paths
+- Invalid node references in `@onready` vars
+- Missing class_name dependencies
+
+### What it does NOT catch
+
+- Logic bugs (use GdUnit4 tests for those)
+- Visual issues (requires editor or running the game)
+- Input handling (requires player interaction)
+
+---
+
 ## Quality Checks (Every Increment)
 
-Run these before each commit:
+The pre-commit hook and `scripts/godot_validate.sh` automate these, but you can also run them manually:
+
 ```bash
-gdlint .            # No lint warnings
-gdformat --check .  # Formatting is consistent
+gdlint .                        # No lint warnings (MANDATORY)
+gdformat --check .              # Formatting is consistent (MANDATORY)
+godot --headless --quit          # No parse/load errors (auto in hook + CI)
+./scripts/godot_validate.sh     # All of the above in one command
 ```
-- Verify the game runs without errors in the Godot console
 - Test new systems with GdUnit4 or test scenes
 - Check for `UNSAFE_*` warnings in the editor output panel
