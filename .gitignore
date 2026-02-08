@@ -41,6 +41,9 @@ desktop.ini
 # Uncomment if you want to exclude from version control:
 # .web-archive/
 
+# Godot local config (machine-specific Godot binary path)
+.gdenv
+
 # Godot (if using Path B)
 .godot/
 export/

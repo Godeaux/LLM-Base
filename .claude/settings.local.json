@@ -3,7 +3,11 @@
     "allow": [
       "Bash(cd:*)",
       "Bash(git -C \"x:\\\\Testing Projects\\\\LLM-base\" log --oneline -15)",
-      "Read(//x//**)"
+      "Read(//x//**)",
+      "Bash(grep:*)",
+      "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\PATTERNS.md\")",
+      "Bash(ls -la \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\"\" 2>&1 || echo \"Directory may not exist or is empty \")",
+      "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\\\\PATTERNS.md\")"
     ]
   }
 }

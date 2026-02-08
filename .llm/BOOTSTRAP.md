@@ -20,217 +20,166 @@ Assume these unless the user explicitly says otherwise. Do NOT ask about them:
 
 - **Scope**: Intended to eventually ship as a playable product (even if small)
 - **Workflow**: YOU (the AI) do 100% of the coding. Human(s) direct, review, and decide. This is always true regardless of team size.
-- **Platform**: Runs on localhost during development. Packageable for distribution later (browser, desktop, etc.) — don't lock in a distribution target now.
 - **Audience**: Intended for real players, not just a portfolio piece
 
 These are not questions. These are facts about the context.
 
-**Two things to ask early** (can be part of Step 2):
-- **Timeline?** (Quick sprint: hours-to-days / Medium: weeks / Long-term: months+) — Affects scope expectations and how much infrastructure to set up. A 4-hour jam needs minimal scaffolding. A months-long project benefits from more structure.
-- **Team size?** (Solo / 2-3 devs / 4+ devs) — Affects communication overhead, file organization, and how much structure to bake in early. Solo = minimal process. 2-3 = light conventions. 4+ = more explicit boundaries.
+---
+
+## Step 1: Acknowledge + Ask Vision Round
+
+**This is a single message.** Read the user's message, then respond with all of the following in one output:
+
+### Part A: Acknowledge (prose, 2-4 sentences)
+
+1. Restate the user's idea back to confirm understanding.
+2. Note anything you can already infer (art style, genre, perspective, etc.) so they know you listened.
+3. Transition with: *"Before I write any code, I need to ask some questions across two rounds — vision/vibe, then gameplay details."*
+
+### Part B: Vision Questions (numbered list)
+
+Ask **all** of the following. Do not skip any, even if the user already addressed them — confirming is better than assuming.
+
+1. **Timeline**: How long is this project? (hours-to-days sprint / weeks / months+)
+2. **Team size**: How many people? (solo / 2-3 / 4+)
+3. **Art direction**: What visual style? (pixel art, low-poly, stylized, realistic, geometric/abstract, hand-drawn)
+4. **Audio direction**: What's the sound vibe? (retro, orchestral, electronic, ambient, none yet)
+5. **Name**: Got a working title? (yes / pick one later)
+6. **Inspirations**: Any games, movies, or aesthetics that capture the feel? (specific titles or "nothing specific")
+
+**STOP. Wait for response.**
 
 ---
 
-## Step 1: Acknowledge and Understand
+## Step 2: Summarize Vision + Ask Gameplay Round
 
-Read the user's message carefully. Respond by:
+**This is a single message.** After the user answers Step 1's questions:
 
-1. Restating their idea back in 2-3 sentences to show you understood
-2. Listing what you CAN already infer from their description (so you don't waste time re-asking)
-3. Saying something like:
+### Part A: Summarize (prose, 2-4 sentences)
 
-> Before I write any code, I want to ask some questions to make sure I build the right foundation. I'll keep it to two quick rounds — art/vibe, then gameplay details.
+Restate what the user answered in the vision round. Use their words where possible. This is a checkpoint — if you misunderstood something, they'll correct it here.
 
-Then ask the **first round only**. Do NOT dump all questions at once.
+### Part B: Gameplay Questions (numbered list)
 
----
+Ask **all** of the following. Do not skip any.
 
-## Step 2: Art & Identity Round (ask these FIRST, wait for answers)
+1. **Dimension**: Is this a 2D game, 3D game, or 2.5D (3D graphics with constrained gameplay)? If unsure, describe the look and feel — we'll figure it out together. (2D / 3D / 2.5D / not sure)
+2. **Perspective**: How does the player view the game? (top-down, side-scroll, isometric, first-person, third-person, fixed camera)
+3. **Core verb**: What does the player actively DO most of the time? (move, build, shoot, manage, solve, survive)
+4. **Pacing**: Is this lean-forward or lean-back? (constant decisions / intermittent decisions / mostly watching)
+5. **Failure state**: Can the player lose? What happens? (restart, checkpoint, permadeath, no failure)
+6. **Progression**: What changes between hour 1 and hour 10? (new abilities, harder levels, story, unlocks, nothing)
+7. **Session length**: How long is a typical play session? (under 5 min, 5-30 min, 30-60 min, 60+ min)
+8. **Complexity curve**: What starts simple and gets complex later? (specific mechanic or system)
 
-Skip anything the user already covered. Only ask what's actually missing:
-
-- **Art direction**: What's the visual vibe? (Low-poly, stylized, pixel art, realistic, geometric/abstract, hand-drawn?) Do you have any art assets, or will everything be procedural/placeholder for now?
-- **Audio vibe**: Any feel for the soundtrack / sound effects direction? (Retro, orchestral, electronic, ambient, none yet?)
-- **Name / working title**: Got one, or should we pick something later?
-- **Inspirations**: Any specific games, movies, or aesthetics that capture the feel you're going for?
-
-These questions help the AI make better visual/aesthetic choices later. They're quick.
-
-**WAIT for the user to respond before proceeding to Step 3.** Do not continue to gameplay questions in the same message.
+**STOP. Wait for response.**
 
 ---
 
-## Step 3: Gameplay Round (ask AFTER Step 2 is answered)
+## Step 3: Summarize Gameplay + Present Tech Recommendation
 
-Skip anything the user already covered. Only ask what's genuinely unclear:
+**This is a single message.** After the user answers Step 2's questions:
 
-- **Camera / perspective**: How does the player view the game? (top-down, orbital, first-person, fixed, etc.)
-- **Core interaction**: What does the player actively DO vs. what happens automatically?
-- **Pacing**: Is this a lean-forward game (constant decisions) or lean-back (watch and occasionally intervene)?
-- **Failure state**: Can you lose? What happens? Restart, checkpoint, or no failure?
-- **Progression arc**: What does hour 1 vs. hour 10 look like? What changes?
-- **Session length**: 5-minute runs, 30-minute sessions, or endless?
-- **Complexity curve**: What's simple at first and gets complex later?
+### Part A: Summarize (prose, 2-4 sentences)
 
-**WAIT for the user to respond before proceeding to Step 4.**
+Restate what the user answered in the gameplay round. Confirm the core loop in one sentence.
+
+### Part B: Engine Recommendation (prose + table)
+
+Based on everything gathered, recommend **one** engine path. Present it as a decision, not a menu. Fill in the appropriate table below with **specific** choices — not option lists.
+
+**Decision criteria for engine path:**
+- Recommend **Web (TypeScript)** for: browser-first, rapid prototyping, web distribution, simpler 2D, 3D where Three.js/Babylon.js suffice.
+- Recommend **Godot (GDScript)** for: built-in editor tooling, complex scene trees, physics with editor integration (Jolt default in 4.6), particle/shader editors, animation state machines, desktop/console distribution, both 2D and 3D with first-class support for each.
+- Do NOT recommend Godot just because the game is 3D — Three.js handles plenty of 3D games.
+
+#### If recommending Web (TypeScript):
+
+| Decision | Choice | Why |
+|----------|--------|-----|
+| **Renderer** | _your specific pick_ | _one-sentence reason_ |
+| **Physics** | _your specific pick or "none"_ | _one-sentence reason_ |
+| **State management** | _your specific pick_ | _one-sentence reason_ |
+| **Audio** | _your specific pick_ | _one-sentence reason_ |
+| **Build tool** | _your specific pick_ | _one-sentence reason_ |
+| **Networking** | _your specific pick or "none"_ | _one-sentence reason_ |
+
+#### If recommending Godot (GDScript):
+
+Use the 2D vs 3D decision guide in `.llm/godot/DECISIONS.md` to inform the dimension, rendering, and physics choices below. The user's answers to the dimension and perspective questions should make this straightforward.
+
+| Decision | Choice | Why |
+|----------|--------|-----|
+| **Dimension** | _2D / 3D / 2.5D_ | _one-sentence reason based on their art style, perspective, and genre_ |
+| **Godot version** | _4.6 stable unless they have a reason otherwise_ | _one-sentence reason_ |
+| **Rendering method** | _Forward+ for 3D, GL Compatibility for 2D_ | _one-sentence reason_ |
+| **Physics** | _Jolt for 3D (default), Godot Physics for 2D_ | _one-sentence reason_ |
+| **State management** | _your specific pick_ | _one-sentence reason_ |
+| **Scene structure** | _your specific pick_ | _one-sentence reason_ |
+| **Networking** | _your specific pick or "none"_ | _one-sentence reason_ |
+
+### Part C: Closing (exact format)
+
+End with exactly this structure:
+
+> I recommend **[Web/Godot]** because [1-2 sentence reason]. This will configure your project for [path] and **permanently remove the [other path] files** — you can always clone fresh if you change your mind later.
+>
+> Does this sound right, or would you change anything?
+
+**STOP. Wait for response.**
 
 ---
 
-## Step 4: Technical Recommendation (ask AFTER Step 3 is answered)
+## Step 4: Handle Confirmation or Pushback
 
-Now YOU present a recommended tech stack. Don't ask the user to choose from a menu — make a specific recommendation and explain why. The user can push back.
+**This step has two possible flows:**
 
-**First, determine the engine path.** Based on the game's needs, recommend one of:
+### If the user confirms (says yes, looks good, etc.):
+Proceed directly to Step 5.
 
-### Path A: Web-based (TypeScript + libraries)
-Best for: browser-first games, rapid prototyping, web distribution, simpler 2D games, or 3D games where Three.js/Babylon.js suffice.
+### If the user pushes back (wants changes):
 
-| Decision | Your recommendation | Why |
-|----------|-------------------|-----|
-| **Renderer** | Three.js / Babylon.js / Phaser / PixiJS / etc. | Based on 2D/3D, complexity, features needed |
-| **Physics** | Rapier / cannon-es / Ammo.js / built-in / none | Based on gameplay needs |
-| **State management** | Simple objects / FSM / ECS | Based on entity complexity |
-| **Audio** | Howler.js / Web Audio / framework built-in | Based on audio needs |
-| **Build tool** | Vite (default) / other | Almost always Vite |
-| **Networking** | None / Socket.io / Colyseus / WebRTC | Only if multiplayer |
-| **Other deps** | Only what's needed | Justify each one |
+**First pushback:** Explain your reasoning in 1-2 sentences. Then present the adjusted recommendation. Ask for confirmation again.
 
-### Path B: Godot (GDScript)
-Best for: games needing a full engine (built-in physics, scene tree, animation, particles, lighting), desktop-first distribution, complex 3D, or when the user mentions Godot.
-
-| Decision | Your recommendation | Why |
-|----------|-------------------|-----|
-| **Godot version** | 4.x (stable) | GDScript 2.0, improved 3D, typed syntax |
-| **Rendering** | Forward+ / Mobile / Compatibility | Based on visual complexity and target platform |
-| **Physics** | Built-in Godot physics / Jolt override | Based on simulation needs |
-| **State management** | Autoloads / signals / Resources | Based on complexity |
-| **Scene structure** | Recommended scene tree layout | Based on game architecture |
-| **Networking** | None / built-in MultiplayerAPI / ENet | Only if multiplayer |
-| **GDExtension** | Only if needed | For performance-critical native code |
-
-**If recommending Godot, explain why it fits better than the web path (or vice versa).** Don't recommend Godot just because the game is 3D — Three.js handles plenty of 3D games. Recommend Godot when the user needs: built-in editor tooling, complex scene trees, built-in physics with editor integration, particle/shader editors, animation state machines, or plans to ship to desktop/console.
-
-End with something like:
-
-> "I recommend **[Web/Godot]** because [reasons]. This will configure your project for [path] and **remove the [other path] files** — you can always clone fresh if you change your mind later. Does this sound right?"
-
-**WAIT for confirmation before proceeding to Step 5.**
+**Second pushback (or if the user insists):** Accept unconditionally. Update the table with their preference and proceed to Step 5. Do not argue further.
 
 ---
 
 ## Step 5: Rewrite the Foundation
 
-Only after the user confirms (or adjusts) the tech stack, rewrite these files.
+Only after the user confirms (or adjusts) the tech stack, rewrite the project files.
 
-**⚠️ You MUST fill in `.llm/DISCOVERY.md` FIRST.** The pre-commit hook will block commits if it still contains template placeholders. `src/index.ts` also contains a blocker comment — only replace it after DISCOVERY.md is complete.
+**Follow the setup instructions in the chosen engine's folder:**
 
-### If Path A (Web/TypeScript):
+- **Path A (Web/TypeScript):** Follow `.llm/web/SETUP.md`
+- **Path B (Godot/GDScript):** Follow `.llm/godot/SETUP.md`
 
-1. **`.llm/DISCOVERY.md`** — Fill in ALL blank fields with the user's actual answers. This unlocks everything else (the pre-commit hook checks for template placeholders like `_one-sentence description_`).
-
-2. **`.llm/DECISIONS.md`** — Fill in the tech stack table with choices and reasoning. Fill in dependencies with alternatives that were considered. Add architecture notes.
-
-3. **`package.json`** — Update `name` to match the game. Add chosen renderer/physics/audio as dependencies. Update `dev` script to actually start a Vite dev server (or whatever was chosen). Keep existing lint/format/test scripts.
-
-4. **`tsconfig.json`** — Adjust for chosen framework (JSX if needed, path aliases, etc.)
-
-5. **`eslint.config.js`** — Add framework-specific plugins if needed.
-
-6. **`src/index.ts`** — NOW you can replace the blocker comment and empty export with a minimal "hello world" for the chosen renderer. Initialize the renderer, create a basic scene, show SOMETHING on screen. Keep it under 40 lines — this is proof-of-life, not the game.
-
-7. **`README.md`** — Rewrite to describe THIS game, not the template. Keep the scripts table, update everything else.
-
-8. **Delete Godot template files** — Remove the `.godot-template/` directory entirely.
-
-9. **Trim `.llm/PATTERNS.md`** — Remove all GDScript examples from each pattern section, keeping only the TypeScript examples. This keeps the reference concise and relevant.
-
-### If Path B (Godot/GDScript):
-
-**Templates available:** The `.godot-template/` folder contains starter files. Copy and customize them — don't start from scratch.
-
-1. **`.llm/DISCOVERY.md`** — Fill in ALL blank fields (same as Path A — this always comes first).
-
-2. **`.llm/DECISIONS.md`** — Fill in with Godot-specific decisions (version, rendering method, physics approach, scene structure). Replace the web-centric dependencies table with Godot equivalents (addons, GDExtensions if any).
-
-3. **Delete web-specific files** — Remove these files entirely:
-   - `package.json`
-   - `package-lock.json` (if exists)
-   - `tsconfig.json`
-   - `eslint.config.js`
-   - `.prettierrc`
-   - `src/` directory
-   - `tests/` directory
-   - `node_modules/` (if exists)
-
-   These are not archived. To switch to web path later, clone fresh and re-run bootstrap.
-
-4. **Copy and customize `project.godot`** — Start from `.godot-template/project.godot`:
-   ```ini
-   config_version=5
-
-   [application]
-   config/name="Your Game Name"        ; ← Update this
-   config/features=PackedStringArray("4.3")
-   run/main_scene="res://main.tscn"
-
-   [rendering]
-   renderer/rendering_method="forward_plus"  ; ← Or "mobile" / "gl_compatibility"
-   ```
-
-5. **Copy and customize entry scene** — Start from `.godot-template/main.tscn` and `.godot-template/main.gd`:
-
-   For **2D games**, keep as-is (uses `Node2D` + `Camera2D`).
-
-   For **3D games**, change to:
-   ```gdscript
-   extends Node3D
-
-   func _ready() -> void:
-       print("Game started. Foundation is working.")
-   ```
-   And update `main.tscn` to use `Node3D` + `Camera3D`.
-
-6. **Copy `.gdlintrc`** — Copy `.godot-template/.gdlintrc` to the project root. This configures GDScript linting (enforces naming conventions, line length, etc.).
-
-7. **Update `.husky/pre-commit`** — The hook already supports Godot projects. If `gdlint` is installed locally, it will run on commit. Otherwise, CI handles linting.
-
-8. **`README.md`** — Rewrite to describe the Godot project. Replace npm scripts table with Godot workflow:
-   ```markdown
-   ## Running the Game
-   1. Open this folder in Godot 4.3+
-   2. Press F5 (or Play button) to run
-
-   ## Linting
-   Install gdtoolkit: `pip install gdtoolkit`
-   Run: `gdlint .`
-   ```
-
-9. **Delete or keep `.godot-template/`** — After copying, you can delete the template folder or keep it for reference. It won't interfere with Godot.
-
-10. **Trim `.llm/PATTERNS.md`** — Remove all TypeScript examples from each pattern section, keeping only the GDScript examples. This keeps the reference concise and relevant.
-
-### Files to NOT touch (either path):
-- `.llm/PERSONAS.md` — useful as-is for ongoing development
-- `.llm/PRINCIPLES.md` — useful as-is for ongoing development
-- `.llm/BOOTSTRAP.md` — this file; leave it for reference
-- `CLAUDE.md` — project instructions; leave as-is
-- Don't create game-specific folders or systems yet
+Those files contain the complete, step-by-step instructions for configuring the project, including which files to create, modify, and delete.
 
 ---
 
-## Step 6: Verify and Hand Off
+## Step 6: Promote and Clean Up
 
-After rewriting:
+After completing the engine-specific setup from Step 5, clean up the engine folders:
 
-### Path A (Web/TypeScript):
-1. Run `npm install`
-2. Run `npm run build` — must pass
-3. Run `npm run lint` — must pass
-4. Tell the user: *"The foundation is configured. Run `npm run dev` to see it working. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
+1. **Delete the non-chosen engine folder entirely:**
+   - If Web was chosen: delete `.llm/godot/`
+   - If Godot was chosen: delete `.llm/web/`
 
-### Path B (Godot/GDScript):
-1. Confirm `project.godot` is valid and the entry scene exists
-2. Tell the user: *"The foundation is configured. Open this folder in Godot 4.x and hit Play to see the base scene. Now let's define your first playable — the smallest version where you can feel if the core is fun."*
+2. **Promote the chosen engine's files to `.llm/` root:**
+   - Move all files from `.llm/<chosen>/` up to `.llm/`
+   - For example, `.llm/web/PATTERNS.md` becomes `.llm/PATTERNS.md`
+   - This applies to: `PATTERNS.md`, `SETUP.md`, `DECISIONS.md`, `TOOLING.md`
+
+3. **Delete the now-empty engine subfolder.**
+
+After this step, the `.llm/` directory should contain only engine-agnostic files plus the chosen engine's promoted files. No trace of the rejected engine remains.
+
+---
+
+## Step 7: Verify and Hand Off
+
+Follow the verification steps in the `SETUP.md` (now promoted to `.llm/SETUP.md`).
 
 Then transition to normal development using the personas in `PERSONAS.md`.
 
@@ -240,16 +189,18 @@ Then transition to normal development using the personas in `PERSONAS.md`.
 
 1. **NEVER write code before completing Steps 1-4.** Even if the user says "just start coding." The questions take 5 minutes. Bad foundations waste days.
 
-2. **Don't re-ask things the user already told you.** Parse their initial message carefully. Only ask about gaps.
+2. **Ask every question.** Even if the user already addressed it in their opening message. Confirming is fast; assuming is risky. The user can say "already answered above" — that's fine.
 
-3. **One round at a time.** Send vision questions → wait → send gameplay questions → wait → send tech recommendation → wait → then rewrite. Never combine rounds.
+3. **One round at a time.** Vision questions → STOP → gameplay questions → STOP → tech recommendation → STOP. Never combine rounds in a single message.
 
-4. **Summarize before moving on.** After each round, restate what you understood. Let the user correct misunderstandings before they compound.
+4. **Summarize at every transition.** Before asking the next round, restate what the user answered. Use their words. This catches misunderstandings before they compound.
 
-5. **Recommend, don't menu.** Don't say "would you like Three.js or Babylon.js?" Say "I recommend Three.js because [reason]. Here's what that means for your project."
+5. **Recommend, don't menu.** Fill in the tech stack table with specific choices. Don't say "would you like Three.js or Babylon.js?" Say "I recommend Three.js because [reason]."
 
-6. **Keep it conversational.** These are questions, not a form. React to what the user says. Follow up on interesting details. Skip irrelevant questions.
+6. **Numbered lists for questions.** Every question round uses a numbered list with bold labels. Not prose, not bullets, not conversational paragraphs.
 
-7. **The user might not know the answer.** That's fine. If they say "I don't know," make a recommendation and explain it. Don't stall.
+7. **The user might not know the answer.** That's fine. If they say "I don't know," make a recommendation and note it. Don't stall.
 
 8. **Bias toward starting small.** When in doubt, recommend simpler tech, fewer dependencies, less architecture. It's easier to add than to remove.
+
+9. **Two-strike pushback rule.** If the user disagrees with a tech recommendation: explain your reasoning once, then accept their preference unconditionally on the second pushback.

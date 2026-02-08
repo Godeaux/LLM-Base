@@ -25,23 +25,25 @@ When recommending or discussing features, communicate expected complexity so the
 
 ## Code Principles
 
-### Grow structure, don't prescribe it
-- Start flat. Add folders and reorganize when files naturally cluster.
-- No empty folders. No placeholder files.
-- Structure emerges from the game, not before it.
-- Three files in a folder is a hint. Five is a signal. Act then.
+### Start organized, grow organically
+- Begin with the baseline folder structure from `TOOLING.md`. This gives the project a skeleton that both humans and LLMs can navigate from day one.
+- Don't create empty folders — only add folders when you have files for them. But DO create the right folder from the first file (e.g., the first enemy script goes in `entities/enemies/`, not in the root).
+- As the project grows, subdivide folders that get crowded. Three files is fine. Ten files is a signal to split by context.
+- The goal: an LLM (or a new team member) should be able to understand what a folder contains just from its name and path. `entities/enemies/wave_spawner.gd` tells a story. `wave_spawner.gd` in the root does not.
 
-### Small files, clear names
+### Small files, descriptive names
 - One concept per file.
-- Name describes content: `PlayerMovement.ts` / `player_movement.gd` — not `utils` or `helpers`
+- Name describes content — not `utils`, `helpers`, `common`, or `misc`. See `TOOLING.md` for naming conventions.
+- **Prefer verbose names over ambiguous ones.** `player_movement_controller.gd` beats `move.gd`. `enemy_health_component.gd` beats `hp.gd`. The LLM searches by name — descriptive names mean it finds the right file on the first try.
 - ~200 line soft limit. LLMs (and humans) work better with focused files.
 - If a file does two things, it should probably be turned into two files.
 
-### Data over behavior
-- Prefer plain objects to classes.
+### Composition over deep inheritance
+- Prefer composing small, focused pieces over deep class hierarchies.
 - State should be serializable (enables save games, networking, debugging, replay).
-- Logic lives in functions that operate on data.
-- Avoid inheritance hierarchies. Composition and functions.
+- In **Godot**: Use the node tree as your composition system. Build entities from small component nodes. Use `Resource` subclasses for pure data (item stats, configs, level definitions) — they're serializable, Inspector-editable, and shareable. Keep `Node` subclasses focused on behavior. See `TOOLING.md` for the Node Type Selection Guide.
+- In **Web/TypeScript**: Prefer plain objects and interfaces over classes. Logic lives in functions that operate on data.
+- In both: Avoid inheritance deeper than 2 levels. If you need a third level, rethink the design.
 
 ### Explicit over clever
 - No magic. Name things verbosely if needed.
@@ -49,16 +51,16 @@ When recommending or discussing features, communicate expected complexity so the
 - Boring code that works beats clever code that confuses.
 
 ### Types are documentation
-- **TypeScript**: No `any`. Ever. Interfaces for data shapes. Types for unions/primitives.
-- **GDScript**: Use static typing (`var speed: float`, `func move() -> void`). Enable `@warning_ignore` sparingly.
-- In any language: function parameters and returns explicitly typed. The types should tell the story of your data.
+- Use static typing everywhere. No escape hatches unless absolutely necessary.
+- Function parameters and returns explicitly typed. The types should tell the story of your data.
+- See `TOOLING.md` for engine-specific typing guidance.
 
 ### Threading is opt-in
 - Main thread until proven slow.
-- **TypeScript**: Workers for physics, pathfinding, procedural generation, heavy AI.
-- **Godot**: Use `Thread`, `Mutex`, or `WorkerThreadPool` only when profiling shows a bottleneck.
+- Only offload to background threads when profiling shows a bottleneck.
 - Always document WHY something runs off the main thread.
 - Measure before optimizing.
+- See `TOOLING.md` for engine-specific threading APIs.
 
 ---
 
@@ -103,14 +105,13 @@ When recommending or discussing features, communicate expected complexity so the
 - Not everything needs tests.
 - Test: state transitions, save/load, calculations, networking.
 - Skip: rendering, UI layout, things you'll see immediately.
-- **TypeScript**: Tests live in `tests/` mirroring `src/`. Use Vitest.
-- **Godot**: Use GdUnit4 or built-in `_test` scenes. Test scripts that handle game logic.
-- Write tests alongside new systems—don't bolt them on later.
+- Write tests alongside new systems — don't bolt them on later.
+- See `TOOLING.md` for engine-specific test framework and conventions.
 
 ### Lint and format consistently
-- **TypeScript**: ESLint enforces code quality. Prettier enforces style. Run `npm run lint` and `npm run format:check` before committing.
-- **Godot**: Use gdtoolkit (`gdlint`, `gdformat`) if available. Enable static typing warnings in project settings.
+- Use the engine's linting and formatting tools. Run them before every commit.
 - Consistent formatting removes style debates from code review.
+- See `TOOLING.md` for engine-specific linting and formatting commands.
 
 ---
 
@@ -139,9 +140,8 @@ Assets (art, audio, models, etc.) often come later in development. These guideli
 - Design systems to swap assets easily (data-driven references, not hardcoded paths).
 
 ### Asset formats
-- **2D/Web**: PNG for sprites (transparency), WebP for compressed, SVG for scalable UI.
-- **3D/Web**: glTF/GLB preferred (widely supported, compact).
-- **Godot**: Native formats (.tres, .tscn) or import what the engine handles.
+- **2D**: PNG for sprites (transparency), WebP for compressed, SVG for scalable UI.
+- **3D**: glTF/GLB preferred (widely supported, compact). Use engine-native formats where applicable.
 - **Audio**: MP3/OGG for music (compressed), WAV for short SFX (low latency).
 
 ### Keep assets out of version control (when large)

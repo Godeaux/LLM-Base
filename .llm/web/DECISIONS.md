@@ -1,4 +1,4 @@
-# Technical Decisions
+# Technical Decisions — Web / TypeScript
 
 > This document is filled in by the LLM after the bootstrap conversation. It records what was decided and WHY, so every future prompt has context. If this is still a template, the bootstrap hasn't happened yet.
 
@@ -6,25 +6,23 @@
 
 ## Engine Path
 
-_Web (TypeScript) or Godot (GDScript)? Decided during bootstrap Step 4._
-
-**Engine**: _TBD_
+**Engine**: Web (TypeScript)
 
 ## Tech Stack
 
 | Category | Choice | Why |
 |----------|--------|-----|
-| **Renderer / Engine** | _TBD_ | _reasoning_ |
-| **State management** | _TBD_ | _reasoning_ |
-| **Physics** | _TBD_ | _reasoning_ |
-| **Audio** | _TBD_ | _reasoning_ |
-| **Build / Export** | _TBD_ | _reasoning_ |
-| **Networking** | _TBD_ | _reasoning_ |
+| **Renderer** | _TBD_ (Three.js / Babylon.js / Phaser / PixiJS / etc.) | _reasoning_ |
+| **State management** | _TBD_ (Simple objects / FSM / ECS) | _reasoning_ |
+| **Physics** | _TBD_ (Rapier / cannon-es / Ammo.js / none) | _reasoning_ |
+| **Audio** | _TBD_ (Howler.js / Web Audio / framework built-in) | _reasoning_ |
+| **Build tool** | _TBD_ (Vite recommended) | _reasoning_ |
+| **Networking** | _TBD_ (None / Socket.io / Colyseus / WebRTC) | _reasoning_ |
 
-## Dependencies / Addons
+## Dependencies
 
-| Package / Addon | Purpose | Alternatives Considered |
-|-----------------|---------|------------------------|
+| Package | Purpose | Alternatives Considered |
+|---------|---------|------------------------|
 | _TBD_ | _TBD_ | _TBD_ |
 
 ## Architecture Notes
