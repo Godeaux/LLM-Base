@@ -45,6 +45,18 @@ case "${1:-}" in
     ;;
 esac
 
+# Resolve Godot binary: .gdenv file > GODOT_BIN env var > 'godot' in PATH
+GODOT=""
+if [ -f "$PROJECT_ROOT/.gdenv" ]; then
+  GODOT=$(grep "^GODOT_BIN=" "$PROJECT_ROOT/.gdenv" | cut -d= -f2 | tr -d '"' | tr -d "'")
+fi
+if [ -z "$GODOT" ] && [ -n "${GODOT_BIN:-}" ]; then
+  GODOT="$GODOT_BIN"
+fi
+if [ -z "$GODOT" ] && command -v godot > /dev/null 2>&1; then
+  GODOT="godot"
+fi
+
 # Find all .gd files (skip .godot-template/ and .godot/ cache)
 GD_FILES=$(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" 2>/dev/null || true)
 
@@ -87,15 +99,17 @@ if [ "$RUN_HEADLESS" = true ]; then
 
   if ! [ -f "project.godot" ]; then
     echo "${YELLOW}No project.godot found. Skipping headless check.${NC}"
-  elif ! command -v godot > /dev/null 2>&1; then
-    echo "${YELLOW}WARNING: 'godot' binary not found in PATH.${NC}"
-    echo "Headless validation skipped locally. CI will still enforce this."
-    echo "To enable locally, add Godot to your PATH."
+  elif [ -z "$GODOT" ]; then
+    echo "${YELLOW}WARNING: Godot binary not found.${NC}"
+    echo "Headless validation skipped. To enable it, create a .gdenv file:"
+    echo "  echo 'GODOT_BIN=\"/path/to/godot\"' > .gdenv"
+    echo "Or add 'godot' to your PATH. CI will still enforce this."
   else
+    echo "Using Godot binary: $GODOT"
     # Run Godot headless — loads project, parses all scripts, then quits.
     # Timeout after 30 seconds to prevent hangs.
     # Capture stderr where Godot reports errors.
-    GODOT_OUTPUT=$(timeout 30 godot --headless --quit 2>&1 || true)
+    GODOT_OUTPUT=$(timeout 30 "$GODOT" --headless --quit 2>&1 || true)
     GODOT_EXIT=$?
 
     # Check for error patterns in Godot output

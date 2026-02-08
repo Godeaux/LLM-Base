@@ -406,25 +406,36 @@ Running `godot --headless --quit` loads the project, parses all scripts, initial
 
 | Context | Behavior |
 |---------|----------|
-| **Pre-commit hook** | Runs automatically if `godot` is in PATH. Warns if missing. |
+| **Pre-commit hook** | Runs automatically using `.gdenv` path. Warns if Godot not configured. |
 | **CI** | Always runs. Godot is installed via `chickensoft-games/setup-godot`. |
 | **Manual** | Run `./scripts/godot_validate.sh` (lint + headless in one command) |
 | **Lint only** | Run `./scripts/godot_validate.sh --lint` |
 | **Headless only** | Run `./scripts/godot_validate.sh --headless` |
 
-### Setting up the `godot` binary in PATH
+### Configuring the Godot binary path (`.gdenv`)
 
-The headless check requires the `godot` command to be accessible from the terminal:
+During bootstrap, the LLM asks the user for their Godot executable path and creates a `.gdenv` file in the project root. This file is gitignored (machine-specific).
 
-- **Linux**: Download from godotengine.org, extract, symlink or add to PATH:
-  ```bash
-  sudo ln -s /path/to/Godot_v4.6-stable_linux.x86_64 /usr/local/bin/godot
-  ```
-- **macOS**: Symlink the binary from the app bundle:
-  ```bash
-  sudo ln -s /Applications/Godot.app/Contents/MacOS/Godot /usr/local/bin/godot
-  ```
-- **Windows (Git Bash)**: Add Godot's install directory to your system PATH.
+**Format:**
+```bash
+# .gdenv — Machine-specific Godot binary path
+GODOT_BIN="/full/path/to/godot"
+```
+
+**Lookup order** (used by both the pre-commit hook and `scripts/godot_validate.sh`):
+1. `GODOT_BIN` from `.gdenv` file in project root
+2. `GODOT_BIN` environment variable (if set)
+3. `godot` command in PATH (fallback)
+
+**Common paths by platform:**
+- **Windows**: `C:\Users\YourName\Godot\Godot_v4.6-stable_win64.exe`
+- **macOS**: `/Applications/Godot.app/Contents/MacOS/Godot`
+- **Linux**: `/home/yourname/Godot/Godot_v4.6-stable_linux.x86_64`
+
+If the bootstrap didn't create `.gdenv` (e.g., cloning an existing project), create it manually:
+```bash
+echo 'GODOT_BIN="/path/to/your/godot"' > .gdenv
+```
 
 ### What errors it catches
 

@@ -99,10 +99,22 @@ if [ "$IS_GODOT" = true ]; then
   }
 
   # Headless Godot validation: catch runtime/parse errors
+  # Resolve Godot binary: .gdenv file > GODOT_BIN env var > 'godot' in PATH
+  GODOT=""
+  if [ -f ".gdenv" ]; then
+    GODOT=$(grep "^GODOT_BIN=" ".gdenv" | cut -d= -f2 | tr -d '"' | tr -d "'")
+  fi
+  if [ -z "$GODOT" ] && [ -n "${GODOT_BIN:-}" ]; then
+    GODOT="$GODOT_BIN"
+  fi
+  if [ -z "$GODOT" ] && command -v godot > /dev/null 2>&1; then
+    GODOT="godot"
+  fi
+
   if [ -f "project.godot" ]; then
-    if command -v godot > /dev/null 2>&1; then
+    if [ -n "$GODOT" ]; then
       echo "Running headless Godot validation..."
-      GODOT_OUTPUT=$(timeout 30 godot --headless --quit 2>&1 || true)
+      GODOT_OUTPUT=$(timeout 30 "$GODOT" --headless --quit 2>&1 || true)
       if echo "$GODOT_OUTPUT" | grep -qi "error\|SCRIPT ERROR\|Parse Error\|Cannot"; then
         echo ""
         echo "✋ COMMIT BLOCKED: Headless Godot detected errors:"
@@ -114,9 +126,10 @@ if [ "$IS_GODOT" = true ]; then
       echo "Headless Godot check passed."
     else
       echo ""
-      echo "⚠️  WARNING: 'godot' binary not found in PATH."
+      echo "⚠️  WARNING: Godot binary not found."
       echo "Headless validation skipped locally. CI will still enforce this."
-      echo "To enable locally, add Godot to your PATH."
+      echo "To enable locally, create a .gdenv file in the project root:"
+      echo "  echo 'GODOT_BIN=\"/path/to/godot\"' > .gdenv"
       echo ""
     fi
   fi

@@ -111,9 +111,39 @@ gdformat --version
 
 **This is not optional.** The pre-commit hook requires `gdlint` to be installed locally and will block commits if it is missing. Do not proceed until this is confirmed working.
 
-### 8. Verify headless Godot validation
+### 8. Locate the Godot executable
 
-The repository includes `scripts/godot_validate.sh` which runs Godot in headless mode to catch runtime errors without opening the editor. Verify it works:
+**Ask the user (use this phrasing or similar):**
+
+> *"One more thing — I need to know where Godot is installed on your machine. After I write code, I'll automatically run Godot in the background (headless, no window) to make sure there are no script errors or broken references before anything gets committed. This catches problems immediately instead of you finding them later when you hit Play.*
+>
+> *Can you give me the full file path to your Godot executable? For example:*
+> - *Windows: `C:\Users\YourName\Godot\Godot_v4.6-stable_win64.exe`*
+> - *macOS: `/Applications/Godot.app/Contents/MacOS/Godot`*
+> - *Linux: `/home/yourname/Godot/Godot_v4.6-stable_linux.x86_64`*
+>
+> *If you're not sure, check where you downloaded or extracted Godot."*
+
+**After the user provides the path**, create a `.gdenv` file in the project root:
+
+```bash
+# .gdenv — Machine-specific Godot binary path (not committed to git)
+GODOT_BIN="/full/path/to/godot"
+```
+
+Replace the path with whatever the user provided. This file is gitignored (machine-specific), so each developer sets their own.
+
+**Then verify it works:**
+
+```bash
+"$(grep GODOT_BIN .gdenv | cut -d= -f2 | tr -d '"')" --version
+```
+
+If the path is wrong or Godot doesn't run, ask the user to double-check and try again.
+
+### 9. Verify headless validation
+
+The repository includes `scripts/godot_validate.sh` which reads the Godot path from `.gdenv` and runs validation automatically. Test it:
 
 ```bash
 chmod +x scripts/godot_validate.sh
@@ -121,24 +151,24 @@ chmod +x scripts/godot_validate.sh
 ```
 
 This script:
+- Reads `GODOT_BIN` from `.gdenv` (falls back to `godot` in PATH if `.gdenv` is missing)
 - Runs `gdlint` on all `.gd` files
 - Runs `gdformat --check` on all `.gd` files
-- Runs `godot --headless --quit` to load the project and catch parse/load errors
+- Runs Godot in headless mode to load the project and catch parse/load errors
 
-The pre-commit hook calls this script automatically. If the `godot` binary is not in PATH, the hook will warn but still enforce linting. CI always runs the full validation including headless Godot.
+The pre-commit hook uses the same `.gdenv` lookup. If `.gdenv` doesn't exist and `godot` isn't in PATH, the hook will warn but still enforce linting. CI always runs the full validation (it installs its own Godot).
 
-**Tell the user:** *"Make sure the `godot` command is accessible from your terminal. On Linux, this usually means adding Godot to your PATH. On macOS, you can symlink the binary. The pre-commit hook and CI both use headless Godot to catch errors automatically."*
-
-### 9. Update `.husky/pre-commit`
+### 10. Update `.husky/pre-commit`
 
 The hook is already configured to:
 - **Require** `gdlint` on all staged `.gd` files (blocks commit if not installed)
-- **Run** headless Godot validation if the `godot` binary is in PATH
-- **Warn** if `godot` is not in PATH (CI will still catch errors)
+- **Read** `GODOT_BIN` from `.gdenv` for headless validation (falls back to PATH)
+- **Run** headless Godot validation if the binary is found
+- **Warn** if Godot binary is not found anywhere (CI will still catch errors)
 
-No manual changes needed — just confirm `gdlint` is installed (Step 7).
+No manual changes needed — just confirm `.gdenv` exists (Step 8) and `gdlint` is installed (Step 7).
 
-### 10. Rewrite `README.md`
+### 11. Rewrite `README.md`
 
 Rewrite to describe the Godot project. Replace npm scripts table with Godot workflow:
 ```markdown
@@ -148,12 +178,17 @@ Rewrite to describe the Godot project. Replace npm scripts table with Godot work
 
 ## Prerequisites
 - Python 3.x with pip (for gdtoolkit)
-- Godot 4.6+ CLI accessible as `godot` in PATH (for headless validation)
+- Godot 4.6+
 
 ## Setup
 Install linting tools (required — pre-commit hook enforces this):
 ```
 pip install gdtoolkit
+```
+
+Set up headless validation (tells the project where Godot is on your machine):
+```
+echo 'GODOT_BIN="/path/to/your/godot"' > .gdenv
 ```
 
 ## Validation
@@ -165,7 +200,7 @@ Run the full validation suite manually:
 This runs gdlint, gdformat --check, and headless Godot to catch errors.
 ```
 
-### 11. Clean up `.godot-template/`
+### 12. Clean up `.godot-template/`
 
 After copying the files you need, delete the `.godot-template/` folder. It won't interfere with Godot if left, but it's cleaner to remove.
 
