@@ -105,17 +105,17 @@ class_name ThirdPersonCamera extends Node3D
 @export var target: Node3D
 @export var distance: float = 5.0
 @export var mouse_sensitivity: float = 0.003
-@export var min_pitch: float = -80.0
-@export var max_pitch: float = 60.0
+@export var min_pitch_degrees: float = -80.0
+@export var max_pitch_degrees: float = 60.0
 
 var _yaw: float = 0.0
-var _pitch: float = -20.0
+var _pitch: float = deg_to_rad(-20.0)
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
         _yaw -= event.relative.x * mouse_sensitivity
         _pitch -= event.relative.y * mouse_sensitivity
-        _pitch = clampf(_pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
+        _pitch = clampf(_pitch, deg_to_rad(min_pitch_degrees), deg_to_rad(max_pitch_degrees))
 
 func _process(_delta: float) -> void:
     if not target:

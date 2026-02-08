@@ -9,7 +9,7 @@ This repo is designed to be **rewritten by an LLM** based on your game idea. The
 1. **You describe your game** — even a rough idea is fine
 2. **The AI asks clarifying questions** — vision, gameplay, technical scope
 3. **You answer** — briefly, in your own words
-4. **The AI rewrites this repo** — package.json, tsconfig, src/index.ts, and the docs all get tailored to your specific game
+4. **The AI rewrites this repo** — project files and docs all get tailored to your specific game
 5. **You start building** — with a configured foundation instead of a blank slate
 
 ## Quick Start
@@ -20,7 +20,7 @@ This repo is designed to be **rewritten by an LLM** based on your game idea. The
 4. Answer the questions (vision → gameplay → technical)
 5. The AI configures everything, then:
    - **Web path (TypeScript):** `npm install && npm run dev`
-   - **Godot path (GDScript):** Open in Godot 4.3+ and press Play
+   - **Godot path (GDScript):** Open in Godot 4.6 and press Play
 
 That's it. The AI reads `.llm/BOOTSTRAP.md` and handles the rest.
 
@@ -34,13 +34,14 @@ Changed your mind about Web vs Godot? Clone this template fresh and re-run boots
 .llm/
   BOOTSTRAP.md   → Instructions for the AI (drives the initial conversation)
   DISCOVERY.md   → Design document (filled in during bootstrap)
-  DECISIONS.md   → Technical decisions log (filled in during bootstrap)
   PERSONAS.md    → Specialized roles the AI can adopt during development
   PRINCIPLES.md  → Development guidelines
-  PATTERNS.md    → Reference implementations (FSM, events, save/load, pooling, etc.)
+  godot/         → Godot-specific decisions, patterns, setup, and tooling
+  web/           → Web-specific decisions, patterns, setup, and tooling
 .godot-template/ → Godot starter files (used if you choose the Godot path)
+scripts/         → Validation and test runner scripts (Godot path)
 src/
-  index.ts       → Empty entry point (rewritten during bootstrap)
+  index.ts       → Empty entry point (Web path, rewritten during bootstrap)
 tests/           → Test suite directory
 ```
 
@@ -66,6 +67,8 @@ You can still force a specific persona with `@persona` if needed, but the AI wil
 
 ## Scripts
 
+### Web path (TypeScript)
+
 | Command | Purpose |
 |---------|---------|
 | `npm run dev` | Start dev server (configured during bootstrap) |
@@ -76,6 +79,16 @@ You can still force a specific persona with `@persona` if needed, but the AI wil
 | `npm run format:check` | Check formatting |
 | `npm test` | Run tests with Vitest |
 | `npm run test:watch` | Run tests in watch mode |
+
+### Godot path (GDScript)
+
+| Command | Purpose |
+|---------|---------|
+| `./scripts/godot_validate.sh` | Lint + headless validation (all checks) |
+| `./scripts/godot_validate.sh --lint` | Lint and format check only |
+| `./scripts/godot_validate.sh --headless` | Headless Godot validation only |
+| `./scripts/godot_validate.sh --all` | Lint + headless + GdUnit4 tests |
+| `./scripts/godot_test.sh` | Run GdUnit4 tests |
 
 ## Principles (summary)
 

@@ -62,8 +62,8 @@ if [ -z "$GODOT" ] && command -v godot > /dev/null 2>&1; then
   GODOT="godot"
 fi
 
-# Find all .gd files (skip .godot-template/ and .godot/ cache)
-GD_FILES=$(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" 2>/dev/null || true)
+# Find all .gd files (skip .godot-template/, .godot/ cache, and addons/)
+GD_FILES=$(find . -name "*.gd" -not -path "./.godot-template/*" -not -path "./.godot/*" -not -path "./addons/*" 2>/dev/null || true)
 
 if [ -z "$GD_FILES" ]; then
   echo "${YELLOW}No GDScript files found. Skipping validation.${NC}"
@@ -114,8 +114,7 @@ if [ "$RUN_HEADLESS" = true ]; then
     # Run Godot headless — loads project, parses all scripts, then quits.
     # Timeout after 30 seconds to prevent hangs.
     # Capture stderr where Godot reports errors.
-    GODOT_OUTPUT=$(timeout 30 "$GODOT" --headless --quit 2>&1 || true)
-    GODOT_EXIT=$?
+    GODOT_OUTPUT=$(timeout 30 "$GODOT" --headless --quit 2>&1) && GODOT_EXIT=0 || GODOT_EXIT=$?
 
     # Check for error patterns in Godot output
     if echo "$GODOT_OUTPUT" | grep -qi "error\|SCRIPT ERROR\|Parse Error\|Cannot"; then

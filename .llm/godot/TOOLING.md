@@ -169,7 +169,7 @@ func _apply_gravity(delta: float) -> void:
 - Type **all** variables: `var speed: float = 10.0`
 - Type **all** function parameters and return values: `func move(dir: Vector2) -> void:`
 - Type **all** arrays: `var enemies: Array[Enemy] = []`
-- Type **all** dictionaries (4.4+): `var scores: Dictionary[String, int] = {}`
+- Type **all** dictionaries: `var scores: Dictionary[String, int] = {}`
 - Use type inference (`:=`) only when the type is obvious from context: `var name := "Player"`
 
 ### Project-level type safety warnings
@@ -203,7 +203,7 @@ Enable these in **Project Settings → Debug → GDScript** to enforce typing di
 # BAD — no type safety, easy to misspell keys
 var player: Dictionary = {"health": 100, "name": "Hero"}
 
-# GOOD — use typed Dictionary (4.4+)
+# GOOD — use typed Dictionary
 var scores: Dictionary[String, int] = {"Alice": 100, "Bob": 200}
 
 # BETTER for complex structures — use a custom Resource
@@ -264,7 +264,9 @@ class_name ItemData extends Resource
 @export var icon: Texture2D
 @export var stack_size: int = 1
 @export var value: int = 0
-@export_enum("Common", "Uncommon", "Rare", "Epic") var rarity: String = "Common"
+@export var rarity: Rarity = Rarity.COMMON
+
+enum Rarity { COMMON, UNCOMMON, RARE, EPIC }
 ```
 
 Then create `.tres` files in the editor for each item. Reference them in code:

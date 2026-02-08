@@ -116,27 +116,30 @@ var sword: WeaponData = preload("res://data/weapons/sword.tres")
 ```gdscript
 class_name ObjectPool extends Node
 
-var _scene: PackedScene
+@export var scene: PackedScene
+@export var initial_size: int = 10
+
 var _pool: Array[Node] = []
 var _active: Array[Node] = []
 
-func _init(scene: PackedScene, initial_size: int = 10) -> void:
-    _scene = scene
+func _ready() -> void:
     for i: int in initial_size:
-        var obj := _scene.instantiate()
+        var obj := scene.instantiate()
         obj.set_process(false)
-        obj.hide()
+        obj.visible = false
+        add_child(obj)
         _pool.append(obj)
 
 func acquire() -> Node:
     var obj: Node
     if _pool.is_empty():
-        obj = _scene.instantiate()
+        obj = scene.instantiate()
+        add_child(obj)
     else:
         obj = _pool.pop_back()
 
     obj.set_process(true)
-    obj.show()
+    obj.visible = true
     _active.append(obj)
 
     if obj.has_method("reset"):
@@ -147,7 +150,7 @@ func release(obj: Node) -> void:
     if obj in _active:
         _active.erase(obj)
         obj.set_process(false)
-        obj.hide()
+        obj.visible = false
         _pool.append(obj)
 
 func get_active_count() -> int:

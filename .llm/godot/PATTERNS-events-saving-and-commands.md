@@ -56,7 +56,7 @@ static func save_game(data: Dictionary[String, Variant]) -> void:
     if file:
         file.store_string(JSON.stringify(data, "\t"))
 
-static func load_game() -> Dictionary:
+static func load_game() -> Dictionary[String, Variant]:
     if not FileAccess.file_exists(SAVE_PATH):
         return {}
 
@@ -70,7 +70,7 @@ static func load_game() -> Dictionary:
         return _migrate(data)
     return {}
 
-static func _migrate(data: Dictionary) -> Dictionary:
+static func _migrate(data: Dictionary[String, Variant]) -> Dictionary[String, Variant]:
     # Handle version migrations:
     # if data.get("version", 0) < 2: data["new_field"] = default_value
     return data

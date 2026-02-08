@@ -47,12 +47,7 @@ desktop.ini
 # Godot (if using Path B)
 .godot/
 export/
-*.import
 *.translation
-
-# Godot editor settings (user-specific)
-.godot/editor/
-.godot/imported/
 
 # Export templates and builds
 *.exe
