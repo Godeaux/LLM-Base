@@ -46,9 +46,21 @@ NOW you can replace the blocker comment and empty export with a minimal "hello w
 
 Rewrite to describe THIS game, not the template. Keep the scripts table, update everything else.
 
-### 8. Delete Godot template files
+### 8. Delete Godot-specific files
 
-Remove the `.godot-template/` directory entirely.
+Remove these entirely:
+- `.godot-template/` directory (Godot project templates)
+- `scripts/godot_validate.sh` (Godot headless validation script)
+- Delete the `scripts/` directory if it's now empty
+
+### Note on shared configuration files
+
+The `.github/workflows/ci.yml` and `.husky/pre-commit` files contain conditional logic supporting both web and Godot paths. The Godot-specific steps won't run in your project because:
+
+- **CI workflow**: Checks if `package.json` exists. Since you kept it, the web path triggers and Godot steps are skipped.
+- **Pre-commit hook**: Only activates Godot logic when `project.godot` exists AND `package.json` is absent. Neither condition is true for web projects.
+
+The unused Godot steps are harmless — they simply never execute. You can optionally remove them for tidiness, but it's not required.
 
 ---
 

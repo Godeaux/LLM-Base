@@ -39,6 +39,8 @@ Remove these files entirely:
 
 These are not archived. To switch to web path later, clone fresh and re-run bootstrap.
 
+**Note on shared configuration files:** The `.github/workflows/ci.yml` and `.husky/pre-commit` files contain conditional logic supporting both web and Godot paths. After deleting `package.json` above, the web-specific steps become inert — CI checks for `package.json` and skips web steps when it's absent. The unused web steps are harmless and can optionally be removed for tidiness.
+
 ### 4. Copy and customize `project.godot`
 
 Start from `.godot-template/project.godot`:
@@ -192,12 +194,16 @@ echo 'GODOT_BIN="/path/to/your/godot"' > .gdenv
 ```
 
 ## Validation
-Run the full validation suite manually:
+
+Validation runs **automatically on every commit** via the pre-commit hook:
+- `gdlint` on all staged `.gd` files
+- `gdformat --check` for formatting
+- Headless Godot to catch parse/load errors (requires `.gdenv`)
+
+To validate manually before committing:
 ```
 ./scripts/godot_validate.sh
 ```
-
-This runs gdlint, gdformat --check, and headless Godot to catch errors.
 ```
 
 ### 12. Clean up `.godot-template/`
