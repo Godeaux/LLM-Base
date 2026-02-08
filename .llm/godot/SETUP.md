@@ -93,6 +93,8 @@ func _ready() -> void:
 
 **In all cases:** The entry scene should display *something* on first run — even a colored background or a label. "It works" confirmation on first Play press builds confidence.
 
+**Important:** `main.tscn` and `main.gd` stay in the project root (they're the entry point). All other game files must follow the folder structure defined in `TOOLING.md` → Project Structure. From the very first entity, component, or system created after bootstrap, put files in the right folder (`entities/`, `components/`, `systems/`, etc.) — never dump them in the root.
+
 ### 6. Copy `.gdlintrc`
 
 Copy `.godot-template/.gdlintrc` to the project root. This configures GDScript linting (enforces naming conventions, line length, etc.).

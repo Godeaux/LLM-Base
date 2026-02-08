@@ -25,15 +25,16 @@ When recommending or discussing features, communicate expected complexity so the
 
 ## Code Principles
 
-### Grow structure, don't prescribe it
-- Start flat. Add folders and reorganize when files naturally cluster.
-- No empty folders. No placeholder files.
-- Structure emerges from the game, not before it.
-- Three files in a folder is a hint. Five is a signal. Act then.
+### Start organized, grow organically
+- Begin with the baseline folder structure from `TOOLING.md`. This gives the project a skeleton that both humans and LLMs can navigate from day one.
+- Don't create empty folders — only add folders when you have files for them. But DO create the right folder from the first file (e.g., the first enemy script goes in `entities/enemies/`, not in the root).
+- As the project grows, subdivide folders that get crowded. Three files is fine. Ten files is a signal to split by context.
+- The goal: an LLM (or a new team member) should be able to understand what a folder contains just from its name and path. `entities/enemies/wave_spawner.gd` tells a story. `wave_spawner.gd` in the root does not.
 
-### Small files, clear names
+### Small files, descriptive names
 - One concept per file.
-- Name describes content — not `utils` or `helpers`. See `TOOLING.md` for naming conventions.
+- Name describes content — not `utils`, `helpers`, `common`, or `misc`. See `TOOLING.md` for naming conventions.
+- **Prefer verbose names over ambiguous ones.** `player_movement_controller.gd` beats `move.gd`. `enemy_health_component.gd` beats `hp.gd`. The LLM searches by name — descriptive names mean it finds the right file on the first try.
 - ~200 line soft limit. LLMs (and humans) work better with focused files.
 - If a file does two things, it should probably be turned into two files.
 
