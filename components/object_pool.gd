@@ -41,6 +41,8 @@ func acquire() -> Node:
 func release(obj: Node) -> void:
 	if obj in _active:
 		_active.erase(obj)
+		if obj.has_method("deactivate"):
+			obj.deactivate()
 		obj.set_process(false)
 		obj.set_physics_process(false)
 		obj.visible = false

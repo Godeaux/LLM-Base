@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://entities/tumble/block.gd" id="1_block"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(40, 20)
+
+[node name="Block" type="RigidBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_block")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]

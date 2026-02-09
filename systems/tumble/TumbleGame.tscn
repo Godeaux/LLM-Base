@@ -1,17 +1,81 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://systems/tumble/tumble_game.gd" id="1_tumble"]
+[ext_resource type="Script" path="res://systems/tumble/block_spawner.gd" id="2_spawner"]
+[ext_resource type="Script" path="res://components/object_pool.gd" id="3_pool"]
+[ext_resource type="PackedScene" path="res://entities/tumble/Block.tscn" id="4_block"]
+[ext_resource type="Script" path="res://systems/tumble/tower_tracker.gd" id="5_tracker"]
+[ext_resource type="PackedScene" path="res://ui/tumble/TumbleHud.tscn" id="6_hud"]
+
+[sub_resource type="RectangleShape2D" id="floor_shape"]
+size = Vector2(400, 20)
+
+[sub_resource type="RectangleShape2D" id="left_wall_shape"]
+size = Vector2(20, 800)
+
+[sub_resource type="RectangleShape2D" id="right_wall_shape"]
+size = Vector2(20, 800)
 
 [node name="TumbleGame" type="Node2D"]
 script = ExtResource("1_tumble")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(640, 660)
+collision_layer = 1
+collision_mask = 0
 
-[node name="BackButton" type="Button" parent="CanvasLayer"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 110.0
-offset_bottom = 40.0
-text = "Back"
+[node name="FloorShape" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("floor_shape")
+
+[node name="FloorVisual" type="ColorRect" parent="Floor"]
+offset_left = -200.0
+offset_top = -10.0
+offset_right = 200.0
+offset_bottom = 10.0
+color = Color(0.3, 0.3, 0.4, 1)
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(430, 300)
+collision_layer = 1
+collision_mask = 0
+
+[node name="LeftWallShape" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("left_wall_shape")
+
+[node name="LeftWallVisual" type="ColorRect" parent="LeftWall"]
+offset_left = -10.0
+offset_top = -400.0
+offset_right = 10.0
+offset_bottom = 400.0
+color = Color(0.3, 0.3, 0.4, 1)
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(850, 300)
+collision_layer = 1
+collision_mask = 0
+
+[node name="RightWallShape" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("right_wall_shape")
+
+[node name="RightWallVisual" type="ColorRect" parent="RightWall"]
+offset_left = -10.0
+offset_top = -400.0
+offset_right = 10.0
+offset_bottom = 400.0
+color = Color(0.3, 0.3, 0.4, 1)
+
+[node name="BlockSpawner" type="Node" parent="."]
+script = ExtResource("2_spawner")
+
+[node name="BlockPool" type="Node" parent="BlockSpawner"]
+script = ExtResource("3_pool")
+scene = ExtResource("4_block")
+initial_size = 8
+
+[node name="TowerTracker" type="Node" parent="."]
+script = ExtResource("5_tracker")
+
+[node name="TumbleHud" parent="." instance=ExtResource("6_hud")]

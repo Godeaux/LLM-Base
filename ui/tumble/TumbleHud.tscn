@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://ui/cascade/cascade_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://ui/tumble/tumble_hud.gd" id="1_hud"]
 
-[node name="CascadeHud" type="CanvasLayer"]
+[node name="TumbleHud" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
 [node name="TopBar" type="HBoxContainer" parent="."]
@@ -31,13 +31,34 @@ text = "0"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BallCountLabel" type="Label" parent="TopBar"]
+[node name="HeightLabel" type="Label" parent="TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Balls: 0"
+text = "Height: 0"
 
-[node name="UpgradeButton" type="Button" parent="TopBar"]
+[node name="MaxHeightLabel" type="Label" parent="TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(100, 0)
-text = "Upgrades"
+text = "Best: 0"
+
+[node name="BlockCountLabel" type="Label" parent="TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Blocks: 0"
+
+[node name="CollapseLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -30.0
+offset_right = 100.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "COLLAPSE!"
+horizontal_alignment = 1
+vertical_alignment = 1

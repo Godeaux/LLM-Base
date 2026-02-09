@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://systems/cascade/cascade_game.gd" id="1_cascade"]
 [ext_resource type="Script" path="res://systems/cascade/machine_builder.gd" id="2_builder"]
@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://components/object_pool.gd" id="4_pool"]
 [ext_resource type="PackedScene" path="res://entities/cascade/Ball.tscn" id="5_ball"]
 [ext_resource type="PackedScene" path="res://ui/cascade/CascadeHud.tscn" id="6_hud"]
+[ext_resource type="Script" path="res://systems/cascade/cascade_manager.gd" id="7_manager"]
+[ext_resource type="PackedScene" path="res://ui/cascade/UpgradePanel.tscn" id="8_upgrades"]
 
 [node name="CascadeGame" type="Node2D"]
 script = ExtResource("1_cascade")
@@ -24,4 +26,12 @@ script = ExtResource("4_pool")
 scene = ExtResource("5_ball")
 initial_size = 10
 
+[node name="CascadeManager" type="Node" parent="."]
+script = ExtResource("7_manager")
+
 [node name="CascadeHud" parent="." instance=ExtResource("6_hud")]
+
+[node name="UpgradePanelLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="UpgradePanel" parent="UpgradePanelLayer" instance=ExtResource("8_upgrades")]

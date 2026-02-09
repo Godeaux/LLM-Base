@@ -11,7 +11,9 @@
       "Bash(git log:*)",
       "Bash(git fetch:*)",
       "Bash(wc:*)",
-      "Bash(gdformat:*)"
+      "Bash(gdformat:*)",
+      "Bash(python -m gdtoolkit.formatter:*)",
+      "Bash(echo:*)"
     ]
   }
 }
