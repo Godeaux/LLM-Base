@@ -93,14 +93,25 @@ jobs:
           version: 4.6.0-stable
           use-dotnet: false
 
+      - name: Import Godot project (rebuild class cache)
+        run: |
+          if [ -f "project.godot" ]; then
+            echo "Importing project to rebuild script class cache..."
+            timeout 30 godot --headless --import --quit 2>&1 || true
+          fi
+
       - name: Run headless Godot validation
         run: |
           if [ -f "project.godot" ]; then
             echo "Running Godot headless to check for runtime errors..."
-            GODOT_OUTPUT=$(timeout 30 godot --headless --quit 2>&1 || true)
+            GODOT_OUTPUT=$(timeout 30 godot --headless --quit 2>&1) && GODOT_EXIT=0 || GODOT_EXIT=$?
             if echo "$GODOT_OUTPUT" | grep -qE "SCRIPT ERROR|Parse Error|Cannot load source code|Failed loading resource"; then
               echo "Headless Godot detected errors:"
               echo "$GODOT_OUTPUT" | grep -E "SCRIPT ERROR|Parse Error|Cannot load source code|Failed loading resource"
+              exit 1
+            elif [ "$GODOT_EXIT" -ne 0 ] && [ "$GODOT_EXIT" -ne 124 ]; then
+              echo "Godot exited with code $GODOT_EXIT"
+              echo "$GODOT_OUTPUT"
               exit 1
             fi
             echo "Headless Godot check passed."

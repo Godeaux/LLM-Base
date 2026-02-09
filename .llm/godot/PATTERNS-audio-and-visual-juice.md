@@ -107,4 +107,4 @@ func slide_in(control: Control, from_offset: Vector2, duration: float = 0.4) -> 
 - Always use `create_tween()` (bound to the node — auto-freed when node exits tree)
 - Kill previous tweens before starting new ones on the same property to avoid conflicts
 - `TRANS_BACK` and `TRANS_ELASTIC` feel great for game juice
-- For authored, timeline-based animation, use `AnimationPlayer` instead (see TOOLING.md editor workflow section)
+- For authored, timeline-based animation, use `AnimationPlayer` instead (see `TOOLING-editor-workflow.md`)

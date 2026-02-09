@@ -7,7 +7,10 @@
       "Bash(grep:*)",
       "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\PATTERNS.md\")",
       "Bash(ls -la \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\"\" 2>&1 || echo \"Directory may not exist or is empty \")",
-      "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\\\\PATTERNS.md\")"
+      "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\\\\PATTERNS.md\")",
+      "Bash(git log:*)",
+      "Bash(git fetch:*)",
+      "Bash(wc:*)"
     ]
   }
 }

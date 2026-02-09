@@ -102,6 +102,10 @@ if [ "$RUN_HEADLESS" = true ]; then
     echo "Or add 'godot' to your PATH. CI will still enforce this."
   else
     echo "Using Godot binary: $GODOT"
+    # Import first to rebuild the script class cache (needed after class_name changes).
+    echo "Importing project to rebuild script class cache..."
+    timeout 30 "$GODOT" --headless --import --quit 2>&1 || true
+
     # Run Godot headless — loads project, parses all scripts, then quits.
     # Timeout after 30 seconds to prevent hangs.
     # Capture stderr where Godot reports errors.

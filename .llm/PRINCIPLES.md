@@ -26,14 +26,14 @@ When recommending or discussing features, communicate expected complexity so the
 ## Code Principles
 
 ### Start organized, grow organically
-- Begin with the baseline folder structure from `TOOLING.md`. This gives the project a skeleton that both humans and LLMs can navigate from day one.
+- Begin with the baseline folder structure from `TOOLING-project-structure-and-naming.md`. This gives the project a skeleton that both humans and LLMs can navigate from day one.
 - Don't create empty folders — only add folders when you have files for them. But DO create the right folder from the first file (e.g., the first enemy script goes in `entities/enemies/`, not in the root).
 - As the project grows, subdivide folders that get crowded. Three files is fine. Ten files is a signal to split by context.
 - The goal: an LLM (or a new team member) should be able to understand what a folder contains just from its name and path. `entities/enemies/wave_spawner.gd` tells a story. `wave_spawner.gd` in the root does not.
 
 ### Small files, descriptive names
 - One concept per file.
-- Name describes content — not `utils`, `helpers`, `common`, or `misc`. See `TOOLING.md` for naming conventions.
+- Name describes content — not `utils`, `helpers`, `common`, or `misc`. See `TOOLING-project-structure-and-naming.md` for naming conventions.
 - **Prefer verbose names over ambiguous ones.** `player_movement_controller.gd` beats `move.gd`. `enemy_health_component.gd` beats `hp.gd`. The LLM searches by name — descriptive names mean it finds the right file on the first try.
 - ~200 line soft limit. LLMs (and humans) work better with focused files.
 - If a file does two things, it should probably be turned into two files.
@@ -41,7 +41,7 @@ When recommending or discussing features, communicate expected complexity so the
 ### Composition over deep inheritance
 - Prefer composing small, focused pieces over deep class hierarchies.
 - State should be serializable (enables save games, networking, debugging, replay).
-- In **Godot**: Use the node tree as your composition system. Build entities from small component nodes. Use `Resource` subclasses for pure data (item stats, configs, level definitions) — they're serializable, Inspector-editable, and shareable. Keep `Node` subclasses focused on behavior. See `TOOLING.md` for the Node Type Selection Guide.
+- In **Godot**: Use the node tree as your composition system. Build entities from small component nodes. Use `Resource` subclasses for pure data (item stats, configs, level definitions) — they're serializable, Inspector-editable, and shareable. Keep `Node` subclasses focused on behavior. See `TOOLING-types-nodes-and-resources.md` for the Node Type Selection Guide.
 - In **Web/TypeScript**: Prefer plain objects and interfaces over classes. Logic lives in functions that operate on data.
 - In both: Avoid inheritance deeper than 2 levels. If you need a third level, rethink the design.
 
@@ -53,14 +53,14 @@ When recommending or discussing features, communicate expected complexity so the
 ### Types are documentation
 - Use static typing everywhere. No escape hatches unless absolutely necessary.
 - Function parameters and returns explicitly typed. The types should tell the story of your data.
-- See `TOOLING.md` for engine-specific typing guidance.
+- See `TOOLING-types-nodes-and-resources.md` for engine-specific typing guidance.
 
 ### Threading is opt-in
 - Main thread until proven slow.
 - Only offload to background threads when profiling shows a bottleneck.
 - Always document WHY something runs off the main thread.
 - Measure before optimizing.
-- See `TOOLING.md` for engine-specific threading APIs.
+- See `TOOLING-editor-workflow.md` for engine-specific threading APIs.
 
 ---
 
@@ -106,12 +106,12 @@ When recommending or discussing features, communicate expected complexity so the
 - Test: state transitions, save/load, calculations, networking.
 - Skip: rendering, UI layout, things you'll see immediately.
 - Write tests alongside new systems — don't bolt them on later.
-- See `TOOLING.md` for engine-specific test framework and conventions.
+- See `TOOLING-linting-testing-and-validation.md` for engine-specific test framework and conventions.
 
 ### Lint and format consistently
 - Use the engine's linting and formatting tools. Run them before every commit.
 - Consistent formatting removes style debates from code review.
-- See `TOOLING.md` for engine-specific linting and formatting commands.
+- See `TOOLING-linting-testing-and-validation.md` for engine-specific linting and formatting commands.
 
 ---
 

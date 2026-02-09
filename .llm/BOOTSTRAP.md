@@ -169,7 +169,7 @@ After completing the engine-specific setup from Step 5, clean up the engine fold
 2. **Promote the chosen engine's files to `.llm/` root:**
    - Move all files from `.llm/<chosen>/` up to `.llm/`
    - For example, `.llm/web/PATTERNS.md` becomes `.llm/PATTERNS.md`
-   - This applies to: `PATTERNS.md`, `SETUP.md`, `DECISIONS.md`, `TOOLING.md`
+   - This applies to: `PATTERNS-*.md`, `TOOLING-*.md`, `TOOLING.md`, `SETUP.md`, `DECISIONS.md`
 
 3. **Delete the now-empty engine subfolder.**
 
