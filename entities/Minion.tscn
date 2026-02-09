@@ -25,6 +25,77 @@ material = SubResource("StandardMaterial3D_cs5cy")
 inner_radius = 0.251
 outer_radius = 0.298
 
+[sub_resource type="StandardMaterial3D" id="Material_sword"]
+albedo_color = Color(0.75, 0.75, 0.8, 1)
+metallic = 0.6
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_sword"]
+material = SubResource("Material_sword")
+size = Vector3(0.08, 0.5, 0.08)
+
+[sub_resource type="Animation" id="Animation_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/SwordPivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0.3010878, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/SwordPivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_swing"]
+resource_name = "sword_swing"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual/SwordPivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.16666667, 0.21716383, 0.2661618, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0.3010878, 0), Vector3(-0.30363643, 0.67451346, 0.036026478), Vector3(0.100063324, 0.8341934, 0.036026478), Vector3(0.47021002, 0.51847905, 0.036026478), Vector3(0, 0.3010878, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visual/SwordPivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.16666667, 0.21716383, 0.2661618, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 0, 0.49418944), Vector3(0, 0, -0.86887807), Vector3(0, 0, -1.3145623), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_main"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"sword_swing": SubResource("Animation_swing")
+}
+
 [node name="Minion" type="CharacterBody3D" unique_id=158287256]
 script = ExtResource("1_minion")
 
@@ -51,3 +122,13 @@ mesh = SubResource("SphereMesh_1")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Visual" unique_id=369906012]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72290206, 0)
 mesh = SubResource("TorusMesh_vwqaq")
+
+[node name="SwordPivot" type="Node3D" parent="Visual" unique_id=1354904940]
+transform = Transform3D(0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0, 1, 0, 0.3010878, 0)
+
+[node name="Sword" type="MeshInstance3D" parent="Visual/SwordPivot" unique_id=111113455]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.26120555, 0.1182487, 0.28109312)
+mesh = SubResource("BoxMesh_sword")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=169686510]
+libraries/ = SubResource("AnimationLibrary_main")

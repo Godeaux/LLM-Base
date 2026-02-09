@@ -22,13 +22,13 @@ EventBus="*res://autoloads/event_bus.gd"
 
 gdscript/warnings/untyped_declaration=1
 
+[display]
+
+window/size/mode=2
+
 [layer_names]
 
 3d_physics/layer_1="Ground"
 3d_physics/layer_2="Minions"
 3d_physics/layer_3="Enemies"
 3d_physics/layer_4="Payload"
-
-[display]
-
-window/size/mode=2

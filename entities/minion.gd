@@ -46,6 +46,7 @@ var _leash_radius: float = 15.0
 
 # --- Onready variables ---
 @onready var _sphere: MeshInstance3D = $Visual/Sphere
+@onready var _anim_player: AnimationPlayer = $AnimationPlayer
 
 
 # --- Built-in virtual methods ---
@@ -249,12 +250,32 @@ func _move_toward(target_pos: Vector3) -> void:
 
 
 func _on_attack_performed() -> void:
+	_play_sword_swing()
+	_apply_knockback_to_target()
 	if _leash_triggered:
 		_clear_combat_target()
 
 
 func _on_died() -> void:
 	queue_free()
+
+
+func _play_sword_swing() -> void:
+	if not _anim_player:
+		return
+	_anim_player.stop()
+	_anim_player.play("sword_swing")
+
+
+func _apply_knockback_to_target() -> void:
+	if not _combat_target or not is_instance_valid(_combat_target):
+		return
+	if _combat_target.has_method("apply_knockback"):
+		var direction := _combat_target.global_position - global_position
+		var force: float = 3.0
+		if type_data:
+			force = type_data.knockback_force
+		_combat_target.apply_knockback(direction, force)
 
 
 func _update_visual() -> void:

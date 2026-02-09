@@ -13,6 +13,16 @@ What was expected vs. what actually happens. Keep it to 2-3 sentences max.
 
 ---
 
+### [Animation] Three-tier animation strategy — ask before choosing
+**Date:** 2026-02-08
+Not all animations need hand-keying, and not all should be automated. **Ask the user which tier** when an animation is needed, presenting trade-offs:
+
+**Tier 1 — Automated (Claude writes full track data in .tscn).** Best for mechanical/mathematical motions: sine bobs, constant spins, uniform scale pulses, color cycles. Pros: instant, no editor labor, reproducible. Cons: hand-written .tscn tracks lack full editor Value editing (only Time/Easing appear in Inspector) — so later tweaking requires deleting and re-keying through the GUI. Easy to change: timing, amplitude (edit numbers). Hard to change: easing feel, complex choreography.
+
+**Tier 2 — Editor keyframed (Claude sets up AnimationPlayer + empty animations, user keys in editor).** Best for animations that need to "feel" right: attack swings, hit reactions, death anims, anything subjective. Pros: full visual control, preview/scrub, easing curves. Cons: requires editor time. Workflow: select node → pose with gizmo (E=rotate, W=move) → click key icon next to property in Inspector → Godot auto-creates track.
+
+**Tier 3 — Code tweens (runtime procedural).** Best for transient reactive effects: damage flash, UI popups, pickup feedback. Pros: procedural, reacts to game state, parameterizable. Cons: invisible in editor, can't preview or scrub.
+
 ### [Spatial] Path3D curve endpoints must be explicitly placed at tile edge positions
 **Date:** 2026-02-06
 LLM-generated Curve3D points defaulted to tile center `(0,0,0)` instead of the actual edge midpoints (`±5` on X or Z). This caused the horse to "skip" between tiles because the exit of one curve didn't meet the entry of the next. Curves also clipped below the ground plane (Y=0) making them invisible in the editor. **Rules:** (1) Every curve's first point must be at the entry edge position and last point at the exit edge position per `TileDefs.EDGE_POSITIONS`. (2) Raise the Path3D node's Y slightly (~0.1) so curves are visible above the ground. (3) The horse code must apply the Path3D's `Transform3D` when sampling curves, since `Curve3D.sample_baked()` returns Path3D-local coordinates. Validation now warns at runtime if endpoints drift more than 1.0 unit from expected edges.

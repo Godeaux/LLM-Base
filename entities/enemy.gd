@@ -11,6 +11,10 @@ const RETARGET_INTERVAL: float = 0.5
 const GRAVITY: float = 9.8
 
 
+# --- Exports ---
+@export var knockback_decay: float = 10.0
+
+
 # --- Private variables ---
 var _health_component: HealthComponent
 var _attack_component: AttackComponent
@@ -18,6 +22,7 @@ var _visual: Node3D
 var _current_target: Node3D = null
 var _retarget_timer: float = 0.0
 var _emerging: bool = false
+var _knockback_velocity: Vector3 = Vector3.ZERO
 
 
 # --- Built-in virtual methods ---
@@ -53,6 +58,10 @@ func _physics_process(delta: float) -> void:
 		velocity.x = MOVE_SPEED * 0.5
 		velocity.z = 0.0
 
+	velocity.x += _knockback_velocity.x
+	velocity.z += _knockback_velocity.z
+	_knockback_velocity = _knockback_velocity.move_toward(Vector3.ZERO, knockback_decay * delta)
+
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
 	else:
@@ -61,6 +70,14 @@ func _physics_process(delta: float) -> void:
 
 
 # --- Public methods ---
+func apply_knockback(direction: Vector3, force: float) -> void:
+	var flat_dir := direction
+	flat_dir.y = 0.0
+	if flat_dir.length_squared() > 0.001:
+		flat_dir = flat_dir.normalized()
+	_knockback_velocity = flat_dir * force
+
+
 func emerge() -> void:
 	_emerging = true
 	remove_from_group("enemies")
