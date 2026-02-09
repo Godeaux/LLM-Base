@@ -10,7 +10,8 @@
       "Bash(del \"x:\\\\Testing Projects\\\\LLM-base\\\\.llm\\\\godot\\\\PATTERNS.md\")",
       "Bash(git log:*)",
       "Bash(git fetch:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(gdformat:*)"
     ]
   }
 }

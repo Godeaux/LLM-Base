@@ -1,0 +1,44 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Idle Physics"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.6")
+
+[autoload]
+
+EventBus="*res://autoloads/event_bus.gd"
+AudioManager="*res://autoloads/AudioManager.tscn"
+SaveManager="*res://autoloads/save_manager.gd"
+SceneManager="*res://autoloads/scene_manager.gd"
+GameState="*res://autoloads/game_state.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gdunit4/plugin.cfg")
+
+[layer_names]
+
+2d_physics/layer_1="Walls"
+2d_physics/layer_2="PhysicsBodies"
+2d_physics/layer_3="Collectors"
+2d_physics/layer_4="ForceZones"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

@@ -1,0 +1,4 @@
+# GDScript linting configuration (YAML format)
+# See: https://github.com/Scony/godot-gdscript-toolkit/wiki/3.-Linter
+
+max-line-length: 100

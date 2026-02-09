@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://entities/cascade/ball.gd" id="1_ball"]
+[ext_resource type="Script" path="res://components/trail_renderer.gd" id="2_trail"]
+[ext_resource type="Script" path="res://components/stuck_detector.gd" id="3_stuck"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
+radius = 8.0
+
+[node name="Ball" type="RigidBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_ball")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ball")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="TrailRenderer" type="Line2D" parent="."]
+script = ExtResource("2_trail")
+max_points = 15
+trail_width = 3.0
+
+[node name="StuckDetector" type="Node" parent="."]
+script = ExtResource("3_stuck")

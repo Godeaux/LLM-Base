@@ -1,0 +1,116 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/menus/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "IDLE PHYSICS"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 20)
+
+[node name="CascadePanel" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="CascadeHBox" type="HBoxContainer" parent="VBoxContainer/CascadePanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CascadeButton" type="Button" parent="VBoxContainer/CascadePanel/CascadeHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 60)
+text = "The Cascade
+Marble Machine"
+
+[node name="CascadeCurrency" type="Label" parent="VBoxContainer/CascadePanel/CascadeHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TumblePanel" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="TumbleHBox" type="HBoxContainer" parent="VBoxContainer/TumblePanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TumbleButton" type="Button" parent="VBoxContainer/TumblePanel/TumbleHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 60)
+text = "Tumble
+Stacking & Toppling"
+
+[node name="TumbleCurrency" type="Label" parent="VBoxContainer/TumblePanel/TumbleHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="OrbitPanel" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="OrbitHBox" type="HBoxContainer" parent="VBoxContainer/OrbitPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OrbitButton" type="Button" parent="VBoxContainer/OrbitPanel/OrbitHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 60)
+text = "Orbit
+Gravitational Playground"
+
+[node name="OrbitCurrency" type="Label" parent="VBoxContainer/OrbitPanel/OrbitHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
