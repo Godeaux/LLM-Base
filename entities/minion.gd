@@ -52,7 +52,7 @@ var _leash_radius: float = 15.0
 func _ready() -> void:
 	add_to_group("minions")
 	collision_layer = 2
-	collision_mask = 1
+	collision_mask = 9  # Ground (1) + Payload (8)
 	_follow_offset = Vector3(randf_range(-0.8, 0.8), 0.0, randf_range(-0.8, 0.8))
 	_visual_material = _sphere.mesh.surface_get_material(0).duplicate() as StandardMaterial3D
 	_sphere.set_surface_override_material(0, _visual_material)

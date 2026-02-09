@@ -127,6 +127,31 @@ func get_start_route() -> TileRoute:
 	return routes[0]
 
 
+func get_tiles_ahead(from_tile: MapTile, exit_edge: TileDefs.Edge, count: int) -> Array[MapTile]:
+	## BFS walk forward from the given tile's exit edge. Returns up to count tiles,
+	## following all branches at forks.
+	var result: Array[MapTile] = []
+	var visited: Dictionary = {}
+	visited[from_tile.grid_position] = true
+	var queue: Array[Array] = [[from_tile, exit_edge]]
+	while not queue.is_empty() and result.size() < count:
+		var item: Array = queue.pop_front()
+		var tile: MapTile = item[0]
+		var edge: TileDefs.Edge = item[1] as TileDefs.Edge
+		var neighbor_pos := tile.grid_position + TileDefs.edge_to_grid_offset(edge)
+		if visited.has(neighbor_pos):
+			continue
+		visited[neighbor_pos] = true
+		var neighbor: MapTile = _grid.get(neighbor_pos)
+		if not neighbor:
+			continue
+		result.append(neighbor)
+		var entry := TileDefs.opposite_edge(edge)
+		for route: TileRoute in neighbor.get_routes_from_edge(entry):
+			queue.append([neighbor, route.exit_edge])
+	return result
+
+
 func get_next_route(current_tile: MapTile, exit_edge: TileDefs.Edge) -> Dictionary:
 	## Returns { "tile": MapTile, "route": TileRoute } or empty dict if no neighbor.
 	var neighbor_pos := current_tile.grid_position + TileDefs.edge_to_grid_offset(exit_edge)

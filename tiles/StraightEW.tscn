@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b7m50t1uqmuu4"]
 
 [ext_resource type="Script" uid="uid://beqfr87fxx5qg" path="res://tiles/map_tile.gd" id="1_tile"]
+[ext_resource type="PackedScene" path="res://components/SpawnPoint.tscn" id="2_spawn"]
 
 [sub_resource type="Curve3D" id="Curve3D_WE"]
 _data = {
@@ -26,3 +27,6 @@ curve = SubResource("Curve3D_WE")
 use_collision = true
 size = Vector3(10, 0.1, 10)
 material = SubResource("Material_ground")
+
+[node name="SpawnPoint" parent="." instance=ExtResource("2_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)

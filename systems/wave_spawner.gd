@@ -1,20 +1,20 @@
 class_name WaveSpawner
 extends Node
-## Spawns enemies in waves. Next wave starts after current wave is cleared.
+## Spawns enemies in waves at SpawnPoint markers placed on tiles ahead of the
+## Trojan Horse. Next wave starts after current wave is cleared.
 
 
 # --- Constants ---
 const ENEMY_SCENE: PackedScene = preload("res://entities/Enemy.tscn")
-const SPAWN_HEIGHT: float = 5.0
 const INITIAL_DELAY: float = 3.0
 const BETWEEN_WAVE_DELAY: float = 5.0
-const EAST_OFFSET_MIN: float = 20.0
-const EAST_OFFSET_MAX: float = 40.0
-const PERP_OFFSET_MAX: float = 4.0
+const LOOKAHEAD_TILES: int = 6
+const SPAWN_JITTER: float = 1.0
 
 
 # --- Exports ---
 @export var trojan_horse: TrojanHorse
+@export var map_manager: MapManager
 
 
 # --- Private variables ---
@@ -42,27 +42,42 @@ func _start_next_wave() -> void:
 	EventBus.wave_started.emit(_current_wave, enemy_count)
 	print("WaveSpawner: Wave %d — spawning %d enemies." % [_current_wave, enemy_count])
 
-	var positions := _compute_spawn_positions(enemy_count)
-	for pos: Vector3 in positions:
+	var spawn_points := _collect_forward_spawn_points()
+	if spawn_points.is_empty():
+		push_warning("WaveSpawner: no spawn points found ahead of horse.")
+		return
+	for i: int in enemy_count:
+		var sp: SpawnPoint = spawn_points.pick_random()
+		var pos := sp.global_position
+		pos.x += randf_range(-SPAWN_JITTER, SPAWN_JITTER)
+		pos.z += randf_range(-SPAWN_JITTER, SPAWN_JITTER)
+		pos.y = 0.0
 		var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
 		add_child(enemy)
 		enemy.global_position = pos
+		enemy.emerge()
 
 
-func _compute_spawn_positions(count: int) -> Array[Vector3]:
-	var positions: Array[Vector3] = []
-	var base_pos := Vector3.ZERO
-	if trojan_horse:
-		base_pos = trojan_horse.global_position
-	for i: int in count:
-		var east_offset := randf_range(EAST_OFFSET_MIN, EAST_OFFSET_MAX)
-		var perp_offset := randf_range(-PERP_OFFSET_MAX, PERP_OFFSET_MAX)
-		positions.append(Vector3(
-			base_pos.x + east_offset,
-			SPAWN_HEIGHT,
-			base_pos.z + perp_offset,
-		))
-	return positions
+func _collect_forward_spawn_points() -> Array[SpawnPoint]:
+	var result: Array[SpawnPoint] = []
+	if not trojan_horse or not map_manager:
+		return result
+	var current_tile := trojan_horse.get_current_tile()
+	if not current_tile:
+		return result
+	var exit_edge := trojan_horse.get_exit_edge()
+	var ahead_tiles := map_manager.get_tiles_ahead(current_tile, exit_edge, LOOKAHEAD_TILES)
+	var ahead_set: Dictionary = {}
+	for tile: MapTile in ahead_tiles:
+		ahead_set[tile] = true
+	for node: Node in get_tree().get_nodes_in_group("spawn_points"):
+		var sp := node as SpawnPoint
+		if not sp:
+			continue
+		var parent_tile := sp.get_parent() as MapTile
+		if parent_tile and ahead_set.has(parent_tile):
+			result.append(sp)
+	return result
 
 
 func _on_enemy_killed() -> void:

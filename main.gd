@@ -27,3 +27,4 @@ func _ready() -> void:
 	_trojan_horse.initialize(_map_manager)
 	_trojan_horse.start_route(start_tile, _map_manager.get_start_route())
 	_wave_spawner.trojan_horse = _trojan_horse
+	_wave_spawner.map_manager = _map_manager

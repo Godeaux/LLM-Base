@@ -58,6 +58,12 @@ func get_current_tile() -> MapTile:
 	return _current_tile
 
 
+func get_exit_edge() -> TileDefs.Edge:
+	if _current_route:
+		return _current_route.exit_edge
+	return TileDefs.Edge.EAST
+
+
 func initialize(manager: MapManager) -> void:
 	_map_manager = manager
 

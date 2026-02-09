@@ -15,6 +15,7 @@ const GRAVITY: float = 9.8
 # --- Built-in virtual methods ---
 func _ready() -> void:
 	add_to_group("wizard")
+	collision_mask = 9  # Ground (1) + Payload (8)
 	_add_summon_radius_indicator()
 
 

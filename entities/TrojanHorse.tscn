@@ -1,20 +1,31 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://cc8rq5g0o4fnm"]
 
-[ext_resource type="Script" path="res://entities/trojan_horse.gd" id="1_horse"]
-[ext_resource type="Script" path="res://components/health_component.gd" id="2_health"]
+[ext_resource type="Script" uid="uid://874fxgqdr16t" path="res://entities/trojan_horse.gd" id="1_horse"]
+[ext_resource type="Script" uid="uid://ckteoa8f6udp6" path="res://components/health_component.gd" id="2_health"]
 
 [sub_resource type="StandardMaterial3D" id="Material_brown"]
 albedo_color = Color(0.65, 0.5, 0.3, 1)
 
-[node name="TrojanHorse" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_28k1x"]
+size = Vector3(1, 1.1826782, 2.4802246)
+
+[node name="TrojanHorse" type="Node3D" unique_id=45460092]
 script = ExtResource("1_horse")
 
-[node name="HealthComponent" type="Node" parent="."]
+[node name="HealthComponent" type="Node" parent="." unique_id=946762610]
 script = ExtResource("2_health")
 
-[node name="Visual" type="Node3D" parent="."]
+[node name="Visual" type="Node3D" parent="." unique_id=2075296355]
 
-[node name="Body" type="CSGBox3D" parent="Visual"]
+[node name="Body" type="CSGBox3D" parent="Visual" unique_id=979509099]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-size = Vector3(1.0, 1.2, 2.5)
+size = Vector3(1, 1.2, 2.5)
 material = SubResource("Material_brown")
+
+[node name="CollisionBody" type="StaticBody3D" parent="." unique_id=720956767]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CollisionBody" unique_id=140694355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6011658, 0.004272461)
+shape = SubResource("BoxShape3D_28k1x")

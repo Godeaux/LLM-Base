@@ -37,4 +37,16 @@ Computing Transform3D values (camera angles, light directions, node positions) t
 **Date:** 2026-02-06
 When Godot opens a project, it reformats project.godot (reorders sections, adds comments) and .tscn files (adds uid values, unique_id attributes, recalculates load_steps). This is normal and expected — don't fight it. Write files with correct structure and let Godot normalize the format on first open.
 
+### [Tooling] Stale UID cache causes "missing dependencies" after file moves outside Godot
+**Date:** 2026-02-08
+When scripts or scenes are moved via git/CLI/file explorer (not through Godot's editor), the `.godot/uid_cache.bin` still maps UIDs to old paths. Godot resolves ext_resources by UID first, path second — so even if the .tscn has the correct path, the stale UID wins and loading fails. **Fix:** Delete the `.godot/` folder and reopen the project. Godot regenerates the cache on next launch. This commonly happens after `git pull` or branch switches that reorganize files.
+
+### [Physics] New collision layers must be masked by ALL relevant entities, not just the obvious ones
+**Date:** 2026-02-08
+When adding a new collision layer (e.g., "Payload" for the Trojan Horse), it's easy to only update the most obvious consumer (enemies) and forget other entities that also need to collide with it (wizard, minions). **Rule:** When adding a new collision layer, grep for every `collision_mask` assignment in the project and evaluate each one — does this entity need to collide with the new layer? Don't stop at the first obvious fix.
+
+### [Editor UX] Always name collision layers for human readability
+**Date:** 2026-02-08
+Godot's collision layer checkboxes in the inspector only show "Layer 1, Bit 0, value 1" by default — meaningless to a human. **Rule:** Whenever adding or using collision layers, immediately add named labels in `project.godot` under `[layer_names]` (e.g., `3d_physics/layer_1="Ground"`). These names appear as tooltips in the editor, making layer/mask assignment far less error-prone. Do this proactively — don't wait to be asked.
+
 <!-- Add new entries at the top. -->

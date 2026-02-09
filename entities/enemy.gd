@@ -14,21 +14,34 @@ const GRAVITY: float = 9.8
 # --- Private variables ---
 var _health_component: HealthComponent
 var _attack_component: AttackComponent
+var _visual: Node3D
 var _current_target: Node3D = null
 var _retarget_timer: float = 0.0
+var _emerging: bool = false
 
 
 # --- Built-in virtual methods ---
 func _ready() -> void:
 	add_to_group("enemies")
 	collision_layer = 4  # Layer 3 (bit 2 = value 4)
-	collision_mask = 1
+	collision_mask = 9  # Ground (1) + Payload (8)
 	_health_component = $HealthComponent as HealthComponent
 	_attack_component = $AttackComponent as AttackComponent
+	_visual = $Visual
 	_health_component.died.connect(_on_died)
 
 
 func _physics_process(delta: float) -> void:
+	if _emerging:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if not is_on_floor():
+			velocity.y -= GRAVITY * delta
+		else:
+			velocity.y = 0.0
+		move_and_slide()
+		return
+
 	_retarget_timer -= delta
 	if _retarget_timer <= 0.0:
 		_retarget()
@@ -47,7 +60,25 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
+# --- Public methods ---
+func emerge() -> void:
+	_emerging = true
+	remove_from_group("enemies")
+	collision_layer = 0
+	_visual.position.y = -1.8
+	var tween := create_tween()
+	tween.tween_property(_visual, "position:y", 0.0, 1.5) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_callback(_on_emerge_complete)
+
+
 # --- Private methods ---
+func _on_emerge_complete() -> void:
+	_emerging = false
+	add_to_group("enemies")
+	collision_layer = 4
+
+
 func _retarget() -> void:
 	var horse := get_tree().get_first_node_in_group("trojan_horse") as Node3D
 	if horse and global_position.distance_to(horse.global_position) <= DETECTION_RANGE:
