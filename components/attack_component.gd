@@ -5,13 +5,15 @@ extends Node
 
 
 # --- Signals ---
-signal attack_performed
+signal attack_started  ## Emitted when cooldown fires (animation_driven mode). Parent plays animation, then calls deal_damage().
+signal attack_performed  ## Emitted after damage is actually applied.
 
 
 # --- Exports ---
 @export var damage: float = 10.0
 @export var attack_interval: float = 1.5
 @export var attack_range: float = 2.0
+@export var animation_driven: bool = false  ## When true, timer emits attack_started instead of dealing damage directly.
 
 
 # --- Private variables ---
@@ -65,6 +67,18 @@ func _on_timer_timeout() -> void:
 		clear_target()
 		return
 	if not is_target_in_range():
+		return
+	if animation_driven:
+		attack_started.emit()
+	else:
+		deal_damage()
+
+
+func deal_damage() -> void:
+	## Apply damage to current target. Call this from animation Call Method tracks.
+	if not _target_health or not _target_node:
+		return
+	if not is_instance_valid(_target_node):
 		return
 	_target_health.take_damage(damage)
 	attack_performed.emit()

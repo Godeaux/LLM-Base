@@ -35,6 +35,7 @@ func _register_input_actions() -> void:
 	_add_key_action("summon_3", KEY_3)
 	_add_key_action("summon_4", KEY_4)
 	_add_mouse_button_action("click", MOUSE_BUTTON_LEFT)
+	_add_key_action("toggle_debug_paths", KEY_F3)
 
 
 func _add_key_action(action_name: String, keycode: Key) -> void:

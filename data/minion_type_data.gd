@@ -14,7 +14,8 @@ extends Resource
 @export var leash_radius: float = 15.0
 
 @export_group("Combat")
-@export var attack_damage: float = 8.0
+@export var attack_damage: float = 50.0
 @export var attack_interval: float = 1.2
-@export var attack_range: float = 2.5
-@export var knockback_force: float = 3.0
+@export var attack_range: float = 0.9
+@export var aggro_radius: float = 8.0  ## Detection range for acquiring targets (separate from melee range)
+@export var knockback_force: float = 5.0

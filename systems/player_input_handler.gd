@@ -20,6 +20,7 @@ var _dragged_minion: Minion = null
 @onready var _camera: Camera3D = get_node("../Camera3D")
 @onready var _wizard: Wizard = get_node("../Wizard")
 @onready var _minion_manager: MinionManager = get_node("../MinionManager")
+@onready var _horse: TrojanHorse = get_node("../TrojanHorse")
 
 
 # --- Built-in virtual methods ---
@@ -62,6 +63,8 @@ func _on_mouse_motion(screen_pos: Vector2) -> void:
 		if screen_pos.distance_to(_drag_start_screen) > DRAG_THRESHOLD_PX:
 			_is_dragging = true
 			_dragged_minion.start_drag()
+			if _horse:
+				_horse.show_escort_ring()
 	if _is_dragging:
 		var ground_pos := _raycast_ground(screen_pos)
 		if ground_pos != Vector3.INF:
@@ -77,6 +80,8 @@ func _on_mouse_up(screen_pos: Vector2) -> void:
 		_try_summon(screen_pos)
 	if _is_dragging and _dragged_minion:
 		_dragged_minion.end_drag()
+	if _is_dragging and _horse:
+		_horse.hide_escort_ring()
 	_dragged_minion = null
 	_is_dragging = false
 
@@ -86,8 +91,18 @@ func _finish_drag(screen_pos: Vector2) -> void:
 	var world_pos := _raycast_ground(screen_pos)
 	if world_pos == Vector3.INF:
 		return
+	if _horse:
+		var offset := world_pos - _horse.global_position
+		offset.y = 0.0
+		var distance := offset.length()
+		if distance <= MinionManager.ESCORT_RADIUS:
+			var world_angle := atan2(offset.z, offset.x)
+			var local_angle := world_angle - _horse.rotation.y
+			var radius := clampf(distance, 1.5, MinionManager.ESCORT_RADIUS)
+			_dragged_minion.set_escort_position(local_angle, radius)
+			_dragged_minion.set_mode(Minion.Mode.FOLLOW)
+			return
 	_dragged_minion.set_stay_position(world_pos)
-	print("PlayerInputHandler: Pinned minion at %s." % world_pos)
 
 
 func _toggle_minion_mode(minion: Minion) -> void:
@@ -95,6 +110,7 @@ func _toggle_minion_mode(minion: Minion) -> void:
 		minion.set_mode(Minion.Mode.STAY)
 	else:
 		minion.set_mode(Minion.Mode.FOLLOW)
+		_minion_manager.assign_escort_position(minion)
 	print("PlayerInputHandler: Toggled minion to %s." % Minion.Mode.keys()[minion.current_mode])
 
 

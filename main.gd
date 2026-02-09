@@ -8,6 +8,7 @@ extends Node3D
 @onready var _trojan_horse: TrojanHorse = $TrojanHorse
 @onready var _wizard: Wizard = $Wizard
 @onready var _wave_spawner: WaveSpawner = $WaveSpawner
+@onready var _debug_overlay: DebugPathOverlay = $DebugPathOverlay
 
 
 # --- Built-in virtual methods ---
@@ -28,3 +29,4 @@ func _ready() -> void:
 	_trojan_horse.start_route(start_tile, _map_manager.get_start_route())
 	_wave_spawner.trojan_horse = _trojan_horse
 	_wave_spawner.map_manager = _map_manager
+	_debug_overlay.map_manager = _map_manager

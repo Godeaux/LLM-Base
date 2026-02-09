@@ -21,6 +21,9 @@ var _grid: Dictionary = {}  ## Dictionary[Vector2i, MapTile]
 var _start_tile: MapTile
 var _start_entry_edge: TileDefs.Edge
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _astar: AStar2D = AStar2D.new()
+var _grid_to_astar_id: Dictionary = {}  ## Dictionary[Vector2i, int]
+var _next_astar_id: int = 0
 
 ## Tile lookup: keyed by entry_edge * 4 + exit_edge → PackedScene.
 var _tile_lookup: Dictionary = {}
@@ -111,6 +114,7 @@ func generate_map(config: Dictionary) -> void:
 	_start_tile = _grid[Vector2i(0, 0)]
 	_start_entry_edge = TileDefs.opposite_edge(primary_dir)
 	_validate_connections()
+	_build_astar()
 	print("MapManager: generated map — %d tiles, %d columns." % [_grid.size(), columns])
 
 
@@ -170,6 +174,80 @@ func get_next_route(current_tile: MapTile, exit_edge: TileDefs.Edge) -> Dictiona
 			TileDefs.Edge.keys()[chosen.exit_edge]
 		])
 	return { "tile": neighbor, "route": chosen }
+
+
+func world_to_grid(world_pos: Vector3) -> Vector2i:
+	## Converts a world position to the nearest grid coordinate.
+	return Vector2i(roundi(world_pos.x / TILE_SIZE), roundi(world_pos.z / TILE_SIZE))
+
+
+func get_tile_at(grid_pos: Vector2i) -> MapTile:
+	## Returns the MapTile at the given grid position, or null if none exists.
+	return _grid.get(grid_pos) as MapTile
+
+
+func find_path_waypoints(from_world: Vector3, to_world: Vector3) -> PackedVector3Array:
+	## Returns world-space waypoints (tile edge midpoints) from from_world to to_world.
+	## Returns empty array if no path exists or both positions are on the same tile.
+	var from_grid: Vector2i = world_to_grid(from_world)
+	var to_grid: Vector2i = world_to_grid(to_world)
+
+	if from_grid == to_grid:
+		return PackedVector3Array()
+
+	if not _grid_to_astar_id.has(from_grid):
+		from_grid = _find_nearest_grid(from_world)
+		if from_grid == Vector2i(-9999, -9999):
+			return PackedVector3Array()
+	if not _grid_to_astar_id.has(to_grid):
+		to_grid = _find_nearest_grid(to_world)
+		if to_grid == Vector2i(-9999, -9999):
+			return PackedVector3Array()
+
+	var from_id: int = _grid_to_astar_id[from_grid]
+	var to_id: int = _grid_to_astar_id[to_grid]
+	var id_path: PackedInt64Array = _astar.get_id_path(from_id, to_id)
+
+	if id_path.is_empty():
+		return PackedVector3Array()
+
+	var waypoints: PackedVector3Array = PackedVector3Array()
+	for i: int in range(id_path.size() - 1):
+		var current_grid: Vector2 = _astar.get_point_position(id_path[i])
+		var next_grid: Vector2 = _astar.get_point_position(id_path[i + 1])
+		var diff := Vector2i(roundi(next_grid.x - current_grid.x), roundi(next_grid.y - current_grid.y))
+		var edge: TileDefs.Edge = _grid_offset_to_edge(diff)
+		var tile_center := Vector3(current_grid.x * TILE_SIZE, 0.0, current_grid.y * TILE_SIZE)
+		waypoints.append(tile_center + TileDefs.EDGE_POSITIONS[edge])
+	return waypoints
+
+
+func get_graph_edges() -> Array[PackedVector3Array]:
+	## Returns all A* graph edges as pairs of world-space positions (for debug drawing).
+	var edges: Array[PackedVector3Array] = []
+	var visited: Dictionary = {}
+	for grid_pos: Vector2i in _grid:
+		var tile: MapTile = _grid[grid_pos]
+		var from_world := Vector3(grid_pos.x * TILE_SIZE, 0.2, grid_pos.y * TILE_SIZE)
+		for edge: TileDefs.Edge in tile.open_edges:
+			var neighbor_pos: Vector2i = grid_pos + TileDefs.edge_to_grid_offset(edge)
+			var pair_key: int = mini(grid_pos.x * 10000 + grid_pos.y, neighbor_pos.x * 10000 + neighbor_pos.y) * 100000 + maxi(grid_pos.x * 10000 + grid_pos.y, neighbor_pos.x * 10000 + neighbor_pos.y)
+			if visited.has(pair_key):
+				continue
+			visited[pair_key] = true
+			if _grid.has(neighbor_pos):
+				var to_world := Vector3(neighbor_pos.x * TILE_SIZE, 0.2, neighbor_pos.y * TILE_SIZE)
+				var pair: PackedVector3Array = PackedVector3Array([from_world, to_world])
+				edges.append(pair)
+	return edges
+
+
+func get_tile_centers() -> PackedVector3Array:
+	## Returns world-space centers of all tiles (for debug drawing).
+	var centers: PackedVector3Array = PackedVector3Array()
+	for grid_pos: Vector2i in _grid:
+		centers.append(Vector3(grid_pos.x * TILE_SIZE, 0.2, grid_pos.y * TILE_SIZE))
+	return centers
 
 
 # --- Private methods ---
@@ -291,3 +369,54 @@ func _validate_connections() -> void:
 					pos, TileDefs.Edge.keys()[edge],
 					neighbor_pos, TileDefs.Edge.keys()[opposite]
 				])
+
+
+func _build_astar() -> void:
+	## Builds the AStar2D graph from the tile grid.
+	_astar.clear()
+	_grid_to_astar_id.clear()
+	_next_astar_id = 0
+
+	for grid_pos: Vector2i in _grid:
+		var id: int = _next_astar_id
+		_next_astar_id += 1
+		_grid_to_astar_id[grid_pos] = id
+		_astar.add_point(id, Vector2(grid_pos.x, grid_pos.y))
+
+	for grid_pos: Vector2i in _grid:
+		var tile: MapTile = _grid[grid_pos]
+		var from_id: int = _grid_to_astar_id[grid_pos]
+		for edge: TileDefs.Edge in tile.open_edges:
+			var neighbor_pos: Vector2i = grid_pos + TileDefs.edge_to_grid_offset(edge)
+			if _grid_to_astar_id.has(neighbor_pos):
+				var to_id: int = _grid_to_astar_id[neighbor_pos]
+				if not _astar.are_points_connected(from_id, to_id):
+					_astar.connect_points(from_id, to_id)
+
+
+func _find_nearest_grid(world_pos: Vector3) -> Vector2i:
+	## Finds the nearest grid position that exists in the A* graph.
+	var best_grid := Vector2i(-9999, -9999)
+	var best_dist: float = INF
+	var test_grid: Vector2i = world_to_grid(world_pos)
+	for dx: int in range(-3, 4):
+		for dy: int in range(-3, 4):
+			var candidate := test_grid + Vector2i(dx, dy)
+			if _grid_to_astar_id.has(candidate):
+				var candidate_world := Vector3(candidate.x * TILE_SIZE, 0.0, candidate.y * TILE_SIZE)
+				var dist: float = world_pos.distance_squared_to(candidate_world)
+				if dist < best_dist:
+					best_dist = dist
+					best_grid = candidate
+	return best_grid
+
+
+func _grid_offset_to_edge(offset: Vector2i) -> TileDefs.Edge:
+	## Converts a grid offset to the corresponding Edge.
+	if offset == Vector2i(0, -1):
+		return TileDefs.Edge.NORTH
+	elif offset == Vector2i(0, 1):
+		return TileDefs.Edge.SOUTH
+	elif offset == Vector2i(1, 0):
+		return TileDefs.Edge.EAST
+	return TileDefs.Edge.WEST

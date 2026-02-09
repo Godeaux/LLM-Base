@@ -6,10 +6,11 @@ extends Node3D
 
 
 # --- Exports ---
-@export var move_speed: float = 2.0
+@export var move_speed: float = 1.0
 
 # --- Private variables ---
 var _health_component: HealthComponent
+var _escort_ring: MeshInstance3D
 var _map_manager: MapManager
 var _current_tile: MapTile
 var _current_route: TileRoute
@@ -23,6 +24,7 @@ func _ready() -> void:
 	_health_component = $HealthComponent as HealthComponent
 	_health_component.health_changed.connect(_on_health_changed)
 	_health_component.died.connect(_on_died)
+	_create_escort_ring()
 
 
 func _process(delta: float) -> void:
@@ -64,6 +66,16 @@ func get_exit_edge() -> TileDefs.Edge:
 	return TileDefs.Edge.EAST
 
 
+func show_escort_ring() -> void:
+	if _escort_ring:
+		_escort_ring.visible = true
+
+
+func hide_escort_ring() -> void:
+	if _escort_ring:
+		_escort_ring.visible = false
+
+
 func initialize(manager: MapManager) -> void:
 	_map_manager = manager
 
@@ -91,6 +103,21 @@ func _on_route_end() -> void:
 		print("Horse: reached end of map!")
 		return
 	start_route(next["tile"] as MapTile, next["route"] as TileRoute)
+
+
+func _create_escort_ring() -> void:
+	_escort_ring = MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = MinionManager.ESCORT_RADIUS - 0.05
+	torus.outer_radius = MinionManager.ESCORT_RADIUS + 0.05
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.8, 0.8, 0.0, 0.4)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	torus.material = material
+	_escort_ring.mesh = torus
+	_escort_ring.visible = false
+	add_child(_escort_ring)
 
 
 # --- Signal callbacks ---

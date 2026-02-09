@@ -55,6 +55,7 @@ func _start_next_wave() -> void:
 		var enemy: Enemy = ENEMY_SCENE.instantiate() as Enemy
 		add_child(enemy)
 		enemy.global_position = pos
+		enemy.set_map_manager(map_manager)
 		enemy.emerge()
 
 

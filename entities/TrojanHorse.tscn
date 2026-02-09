@@ -6,6 +6,8 @@
 [sub_resource type="StandardMaterial3D" id="Material_brown"]
 albedo_color = Color(0.65, 0.5, 0.3, 1)
 
+[sub_resource type="BoxMesh" id="BoxMesh_28k1x"]
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_28k1x"]
 size = Vector3(1, 1.1826782, 2.4802246)
 
@@ -21,6 +23,10 @@ script = ExtResource("2_health")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 size = Vector3(1, 1.2, 2.5)
 material = SubResource("Material_brown")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Visual" unique_id=1784626070]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.48172522, 0.5240159, 0.751366)
+mesh = SubResource("BoxMesh_28k1x")
 
 [node name="CollisionBody" type="StaticBody3D" parent="." unique_id=720956767]
 collision_layer = 8
