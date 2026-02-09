@@ -10,6 +10,9 @@ signal horse_died
 signal horse_entered_tile(tile_name: String)
 signal horse_reached_fork(route_count: int)
 signal horse_reached_map_end
+signal horse_limb_damaged(limb_index: int, current_hp: float, max_hp: float)
+signal horse_limb_destroyed(limb_index: int)
+signal horse_speed_changed(multiplier: float)
 
 signal minion_summoned(minion_type: int)
 signal minion_mode_changed(mode_name: String)
@@ -35,6 +38,7 @@ func _register_input_actions() -> void:
 	_add_key_action("summon_3", KEY_3)
 	_add_key_action("summon_4", KEY_4)
 	_add_mouse_button_action("click", MOUSE_BUTTON_LEFT)
+	_add_key_action("float", KEY_SPACE)
 	_add_key_action("toggle_debug_paths", KEY_F3)
 
 

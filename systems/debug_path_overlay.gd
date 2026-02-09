@@ -46,7 +46,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		visible = _active
 		if _active and not _graph_cached:
 			_cache_graph()
-		get_viewport().set_input_as_handled()
 
 
 func _process(_delta: float) -> void:
@@ -103,16 +102,23 @@ func _draw_enemy_paths() -> void:
 	if enemies.is_empty():
 		return
 
-	# Draw path lines.
-	_immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
+	# Collect enemies that have drawable waypoints.
+	var drawable: Array[Enemy] = []
 	for node: Node in enemies:
 		var enemy := node as Enemy
 		if not enemy:
 			continue
+		var wp: PackedVector3Array = enemy.get_current_waypoints()
+		if not wp.is_empty() and enemy.get_waypoint_index() < wp.size():
+			drawable.append(enemy)
+	if drawable.is_empty():
+		return
+
+	# Draw path lines.
+	_immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
+	for enemy: Enemy in drawable:
 		var waypoints: PackedVector3Array = enemy.get_current_waypoints()
 		var wp_index: int = enemy.get_waypoint_index()
-		if waypoints.is_empty():
-			continue
 
 		# Line from enemy to current waypoint.
 		var enemy_pos: Vector3 = enemy.global_position
@@ -139,10 +145,7 @@ func _draw_enemy_paths() -> void:
 
 	# Draw waypoint markers.
 	_immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
-	for node: Node in enemies:
-		var enemy := node as Enemy
-		if not enemy:
-			continue
+	for enemy: Enemy in drawable:
 		var waypoints: PackedVector3Array = enemy.get_current_waypoints()
 		var wp_index: int = enemy.get_waypoint_index()
 		for i: int in range(wp_index, waypoints.size()):

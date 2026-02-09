@@ -96,8 +96,8 @@ func _finish_drag(screen_pos: Vector2) -> void:
 		offset.y = 0.0
 		var distance := offset.length()
 		if distance <= MinionManager.ESCORT_RADIUS:
-			var world_angle := atan2(offset.z, offset.x)
-			var local_angle := world_angle - _horse.rotation.y
+			var local_dir := _horse.global_transform.basis.inverse() * offset
+			var local_angle := atan2(local_dir.z, local_dir.x)
 			var radius := clampf(distance, 1.5, MinionManager.ESCORT_RADIUS)
 			_dragged_minion.set_escort_position(local_angle, radius)
 			_dragged_minion.set_mode(Minion.Mode.FOLLOW)
@@ -115,7 +115,7 @@ func _toggle_minion_mode(minion: Minion) -> void:
 
 
 func _try_summon(screen_pos: Vector2) -> void:
-	if _selected_slot != 1:
+	if not _minion_manager.has_type(_selected_slot):
 		print("PlayerInputHandler: Slot %d locked." % _selected_slot)
 		return
 	if not _minion_manager.can_summon():

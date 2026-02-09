@@ -3,6 +3,10 @@ extends Node3D
 ## Manages the game level and coordinates top-level systems.
 
 
+# --- Constants ---
+const HotbarScript: GDScript = preload("res://ui/hotbar.gd")
+
+
 # --- Onready variables ---
 @onready var _map_manager: MapManager = $MapManager
 @onready var _trojan_horse: TrojanHorse = $TrojanHorse
@@ -30,3 +34,9 @@ func _ready() -> void:
 	_wave_spawner.trojan_horse = _trojan_horse
 	_wave_spawner.map_manager = _map_manager
 	_debug_overlay.map_manager = _map_manager
+	var debug_hud := DebugHUD.new()
+	debug_hud.wave_spawner = _wave_spawner
+	debug_hud.trojan_horse = _trojan_horse
+	add_child(debug_hud)
+	var hotbar: CanvasLayer = HotbarScript.new()
+	add_child(hotbar)

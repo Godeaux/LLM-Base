@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MinionTypeData" format=3]
+
+[ext_resource type="Script" path="res://data/minion_type_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+type_name = "Healer"
+color = Color(0.3, 0.9, 0.4, 1)
+behavior_type = "HEALER"
+preferred_follow_angle = 3.14159
+max_health = 20.0
+move_speed = 4.0
+leash_radius = 15.0
+attack_damage = 0.0
+attack_interval = 99.0
+attack_range = 0.0
+aggro_radius = 0.0
+knockback_force = 0.0
+heal_amount = 5.0
+heal_interval = 2.0
+heal_range = 8.0

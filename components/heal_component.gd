@@ -1,19 +1,19 @@
-class_name AttackComponent
+class_name HealComponent
 extends Node
-## Reusable attack component. Deals damage to a target at intervals.
-## Parent entity owns targeting logic — this component only handles cooldown and damage.
+## Reusable heal component. Heals a target at intervals.
+## Parent entity owns targeting logic — this component only handles cooldown and healing.
 
 
 # --- Signals ---
-signal attack_started  ## Emitted when cooldown fires (animation_driven mode). Parent plays animation, then calls deal_damage().
-signal attack_performed  ## Emitted after damage is actually applied.
+signal heal_started  ## Emitted when cooldown fires (animation_driven mode). Parent plays animation, then calls apply_heal().
+signal heal_performed  ## Emitted after heal is actually applied.
 
 
 # --- Exports ---
-@export var damage: float = 10.0
-@export var attack_interval: float = 1.5
-@export var attack_range: float = 2.0
-@export var animation_driven: bool = false  ## When true, timer emits attack_started instead of dealing damage directly.
+@export var heal_amount: float = 5.0
+@export var heal_interval: float = 2.0
+@export var heal_range: float = 6.0
+@export var animation_driven: bool = false  ## When true, timer emits heal_started instead of healing directly.
 
 
 # --- Private variables ---
@@ -27,7 +27,7 @@ var _timer: Timer
 func _ready() -> void:
 	_owner_node = get_parent() as Node3D
 	_timer = Timer.new()
-	_timer.wait_time = attack_interval
+	_timer.wait_time = heal_interval
 	_timer.one_shot = false
 	_timer.timeout.connect(_on_timer_timeout)
 	add_child(_timer)
@@ -55,7 +55,17 @@ func is_target_in_range() -> bool:
 	if not _target_node or not _owner_node:
 		return false
 	var dist := _owner_node.global_position.distance_to(_target_node.global_position)
-	return dist <= attack_range
+	return dist <= heal_range
+
+
+func apply_heal() -> void:
+	## Apply heal to current target. Call this from animation Call Method tracks.
+	if not _target_health or not _target_node:
+		return
+	if not is_instance_valid(_target_node):
+		return
+	_target_health.heal(heal_amount)
+	heal_performed.emit()
 
 
 # --- Private methods ---
@@ -69,16 +79,6 @@ func _on_timer_timeout() -> void:
 	if not is_target_in_range():
 		return
 	if animation_driven:
-		attack_started.emit()
+		heal_started.emit()
 	else:
-		deal_damage()
-
-
-func deal_damage() -> void:
-	## Apply damage to current target. Call this from animation Call Method tracks.
-	if not _target_health or not _target_node:
-		return
-	if not is_instance_valid(_target_node):
-		return
-	_target_health.take_damage_from(damage, _owner_node)
-	attack_performed.emit()
+		apply_heal()

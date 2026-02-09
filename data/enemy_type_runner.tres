@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemyTypeData" format=3 uid="uid://bs8mkh878shof"]
+
+[ext_resource type="Script" uid="uid://bixrrqirqxu45" path="res://data/enemy_type_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+body_color = Color(0.2, 0.6, 0.15, 1)
+halo_color_full = Color(0.4, 1, 0.3, 1)
+max_health = 35.0
+move_speed = 5.0
+attack_damage = 4.0
+knockback_decay = 3.0
+body_scale = Vector3(0.7, 0.7, 0.7)

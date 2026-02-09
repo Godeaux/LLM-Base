@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://entities/heal_projectile.gd" id="1_heal"]
+
+[sub_resource type="StandardMaterial3D" id="Material_heal"]
+albedo_color = Color(0.3, 1.0, 0.4, 1)
+emission_enabled = true
+emission = Color(0.3, 1.0, 0.4, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_heal"]
+material = SubResource("Material_heal")
+radius = 0.12
+height = 0.24
+
+[node name="HealProjectile" type="Node3D"]
+script = ExtResource("1_heal")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("SphereMesh_heal")

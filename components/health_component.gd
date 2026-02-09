@@ -5,6 +5,7 @@ extends Node
 
 # --- Signals ---
 signal health_changed(current: float, maximum: float)
+signal damaged_by(amount: float, attacker: Node3D)
 signal died
 
 # --- Exports ---
@@ -27,9 +28,18 @@ func take_damage(amount: float) -> void:
 		died.emit()
 
 
+func take_damage_from(amount: float, attacker: Node3D) -> void:
+	take_damage(amount)
+	damaged_by.emit(amount, attacker)
+
+
 func heal(amount: float) -> void:
 	_current_health = minf(_current_health + amount, max_health)
 	health_changed.emit(_current_health, max_health)
+
+
+func get_current_health() -> float:
+	return _current_health
 
 
 func get_health_percent() -> float:
